@@ -14,8 +14,14 @@ def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
-    catalog = {"viajes": None}
+    catalog = {
+        "viajes": None,            # Mapa: todos los vuelos ordenados por fecha
+        "aereolinea": None,        # Mapa: aerolínea → RBT de vuelos
+        "destino": None,           # Mapa: aeropuerto destino → RBT de vuelos
+    }
     catalog["viajes"] = rbt.new_map()
+    catalog["aereolinea"] = rbt.new_map()
+    catalog["destino"] = rbt.new_map()
     return catalog
 
 # Funciones para la carga de datos
@@ -33,25 +39,33 @@ def load_data(catalog, filename):
     for viaje in input_file:
         # Creamos un diccionario con la info del vuelo
         vuelo = {
-            "id": viaje["id"],
+            "id": int(viaje["id"]),
             "date": viaje["date"],
             "dep_time": viaje["dep_time"],
             "sched_dep_time": viaje["sched_dep_time"],
             "arr_time": viaje["arr_time"],
             "sched_arr_time": viaje["sched_arr_time"],
             "carrier": viaje["carrier"],
-            "flight": viaje["flight"],
+            "flight": int(viaje["flight"]),
             "tailnum": viaje["tailnum"],
             "origin": viaje["origin"],
             "dest": viaje["dest"],
-            "air_time": viaje["air_time"],
-            "distance": viaje["distance"],
+            "air_time": int(viaje["air_time"]),
+            "distance": int(viaje["distance"]),
             "name": viaje["name"]
         }
 
-        # Insertamos en el árbol rojo-negro usando el id como llave
-        rbt.put(catalog["viajes"], vuelo["id"], vuelo)
-    
+        # Insertamos en el árbol rojo-negro usando el la fecha y hora de salida como llave
+        rbt.put(catalog["viajes"])# key=(vuelo["date"]), value=vuelo)
+        carrier= viaje["carrier"]
+        if carrier not in catalog["aereolinea"]:
+            #hacerle hash al carrier?? e ingresarlo al rbt de aereolinea
+            pass
+        dest = viaje["dest"]
+        if dest not in catalog["destino"]:
+            #hacerle hash al destino?? e ingresarlo al rbt de aereolinea
+            pass
+        
     end = get_time()
     tiempo = delta_time(start, end)
     
@@ -76,11 +90,16 @@ def req_2(catalog):
     pass
 
 
-def req_3(catalog):
+def req_3(catalog, codigo_vuelo, codigo_destino, rango_distancia):
     """
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
+    start= get_time()
+    filtrado=0
+    
+    end= get_time()
+    tiempo= delta_time(start,end)
     pass
 
 
