@@ -28,8 +28,8 @@ def load_data(control):
     """
     #TODO: Realizar la carga de datos
     file = input('Diga el archivo que quiere evaluar (small, medium, large)\n').strip()
-    file = "flights_"+file+".csv"
-    tiempo, trayectos = lg.load_data(catalog, file)
+    file = "data/flights_"+file+".csv"
+    tiempo, trayectos = lg.load_data(control, file)
     print("Datos cargados: ")
     print("Tiempo de carga (ms): "+ str(tiempo))
     print("Viajes cargados: "+str(trayectos))

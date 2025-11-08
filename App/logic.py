@@ -16,12 +16,12 @@ def new_logic():
     """
     catalog = {
         "viajes": None,            # Árbol: todos los vuelos ordenados por fecha → RBT
-        "aereolinea": None,        # Mapa: llave: aerolínea, valor: Mapa: Llave: Aerop Destino, Valor: Lista viajes → Sep Chaining
+        "aerolinea": None,        # Mapa: llave: aerolínea, valor: Mapa: Llave: Aerop Destino, Valor: Lista viajes → Sep Chaining
         "destino": None,           # Mapa: aeropuerto destino → Sep Chaining
         "hora_salida_prg": None    # Árbol: sch_dep_time → RBT
     }
     catalog["viajes"] = rbt.new_map()
-    catalog["aereolinea"] = mp.new_map(20, 4)
+    catalog["aerolinea"] = mp.new_map(20, 4)
     catalog["destino"] = mp.new_map(120, 4)
     catalog["hora_salida_prg"] = rbt.new_map()
     return catalog
@@ -41,9 +41,9 @@ def load_data(catalog, filename):
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
         viaje["id"]= int(viaje["id"])
-        viaje["flight"]= int(viaje["flight"])
-        viaje["air_time"]= int(viaje["air_time"])
-        viaje["distance"]= int(viaje["distance"])
+        viaje["flight"]= int(float(viaje["flight"]))
+        viaje["air_time"]= int(float(viaje["air_time"]))
+        viaje["distance"]= int(float(viaje["distance"]))
         
         trayectos += 1
         # Insertamos el viaje en el árbol rojo-negro viajes usando la fecha como llave
@@ -53,8 +53,7 @@ def load_data(catalog, filename):
             sl.add_last(lista, viaje)
             rbt.put(catalog["viajes"], viaje["date"], lista)
         else:
-            lista = nodo["value"] # key=(vuelo["date"]), value=lista de vuelos)
-            sl.add_last(lista, viaje)
+            sl.add_last(nodo, viaje)
         
         # Insertamos el viaje en el mapa aerolinea usando la aerolínea como llave
         carrier = viaje["carrier"]
@@ -62,7 +61,7 @@ def load_data(catalog, filename):
         if mapa is None:
             n_mapa = mp.new_map(55000,4)
             mp.put(catalog["aerolinea"], carrier, n_mapa)
-        
+        mapa = mp.get(catalog["aerolinea"], carrier)
         lista = mp.get(mapa, viaje["dest"]) #Obtiene la lista del aeropuerto
         if lista is None:
             n_mapa = mp.new_map(16000, 4)
@@ -70,7 +69,7 @@ def load_data(catalog, filename):
             sl.add_last(l, viaje)
             mp.put(mapa, viaje["dest"], l)
         else:
-            sl.add_last(lista["value"], viaje)
+            sl.add_last(lista, viaje)
         
         # Insertamos el viaje en el mapa destino usando el aeropuerto como llave
         lista = mp.get(catalog["destino"], viaje["dest"]) 
