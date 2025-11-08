@@ -26,8 +26,38 @@ def load_data(catalog, filename):
     """
     Carga los datos del reto
     """
-    # TODO: Realizar la carga de datos
-    pass
+    start = get_time()
+    
+    vuelos = filename
+    input_file = csv.DictReader(open(vuelos, encoding='utf-8'))
+    
+    # Por cada fila (vuelo) del CSV
+    for viaje in input_file:
+        # Creamos un diccionario con la info del vuelo
+        vuelo = {
+            "id": viaje["id"],
+            "date": viaje["date"],
+            "dep_time": viaje["dep_time"],
+            "sched_dep_time": viaje["sched_dep_time"],
+            "arr_time": viaje["arr_time"],
+            "sched_arr_time": viaje["sched_arr_time"],
+            "carrier": viaje["carrier"],
+            "flight": viaje["flight"],
+            "tailnum": viaje["tailnum"],
+            "origin": viaje["origin"],
+            "dest": viaje["dest"],
+            "air_time": viaje["air_time"],
+            "distance": viaje["distance"],
+            "name": viaje["name"]
+        }
+
+        # Insertamos en el árbol rojo-negro usando el id como llave
+        rbt.put(catalog["viajes"], vuelo["id"], vuelo)
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    
+    return tiempo
 
 # Funciones de consulta sobre el catálogo
 
