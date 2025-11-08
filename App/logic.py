@@ -16,6 +16,7 @@ def new_logic():
     """
     catalog = {"viajes": None}
     catalog["viajes"] = rbt.new_map()
+    return catalog
     
 
 
