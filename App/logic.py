@@ -17,12 +17,12 @@ def new_logic():
     catalog = {
         "viajes": None,            # Árbol: todos los vuelos ordenados por fecha → RBT
         "aereolinea": None,        # Mapa: llave: aerolínea, valor: Mapa: Llave: Aerop Destino, Valor: Lista viajes → Sep Chaining
-        "destino": None,           # Mapa: aeropuerto destino → Sep Cgaining
+        "destino": None,           # Mapa: aeropuerto destino → Sep Chaining
         "hora_salida_prg": None    # Árbol: sch_dep_time → RBT
     }
     catalog["viajes"] = rbt.new_map()
-    catalog["aereolinea"] = mp.new_map()
-    catalog["destino"] = mp.new_map()
+    catalog["aereolinea"] = mp.new_map(20, 4)
+    catalog["destino"] = mp.new_map(120, 4)
     catalog["hora_salida_prg"] = rbt.new_map()
     return catalog
 
@@ -60,12 +60,12 @@ def load_data(catalog, filename):
         carrier = viaje["carrier"]
         mapa = mp.get(catalog["aerolinea"], carrier) #Obtiene el mapa de los aeropuertos de destino en esa aerolinea
         if mapa is None:
-            n_mapa = mp.new_map()
+            n_mapa = mp.new_map(55000,4)
             mp.put(catalog["aerolinea"], carrier, n_mapa)
         
         lista = mp.get(mapa, viaje["dest"]) #Obtiene la lista del aeropuerto
         if lista is None:
-            n_mapa = mp.new_map()
+            n_mapa = mp.new_map(16000, 4)
             l = sl.new_list()
             sl.add_last(l, viaje)
             mp.put(mapa, viaje["dest"], l)
@@ -90,7 +90,6 @@ def load_data(catalog, filename):
         
     end = get_time()
     tiempo = delta_time(start, end)
-    
     return tiempo, trayectos
 
 # Funciones de consulta sobre el catálogo
