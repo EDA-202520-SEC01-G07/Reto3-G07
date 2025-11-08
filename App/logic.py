@@ -2,9 +2,9 @@ import time
 import csv
 csv.field_size_limit(2147483647)
 from DataStructures.List import array_list as lt
-from DataStructures.Map import map_linear_probing as mp
+from DataStructures.List import single_linked_list as sl
+from DataStructures.Map import map_separate_chaining as mp
 from DataStructures.Map import map_entry as me
-from DataStructures.Tree import binary_search_tree as bst
 from DataStructures.Tree import red_black_tree as rbt
 from DataStructures.Priority_queue import priority_queue as pq
 import math as math
@@ -15,13 +15,15 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     catalog = {
-        "viajes": None,            # Mapa: todos los vuelos ordenados por fecha
-        "aereolinea": None,        # Mapa: aerolínea → RBT de vuelos
-        "destino": None,           # Mapa: aeropuerto destino → RBT de vuelos
+        "viajes": None,            # Árbol: todos los vuelos ordenados por fecha → RBT
+        "aereolinea": None,        # Mapa: llave: aerolínea, valor: Mapa: Llave: Aerop Destino, Valor: Lista viajes → Sep Chaining
+        "destino": None,           # Mapa: aeropuerto destino → Sep Cgaining
+        "hora_salida_prg": None    # Árbol: sch_dep_time → RBT
     }
     catalog["viajes"] = rbt.new_map()
-    catalog["aereolinea"] = rbt.new_map()
-    catalog["destino"] = rbt.new_map()
+    catalog["aereolinea"] = mp.new_map()
+    catalog["destino"] = mp.new_map()
+    catalog["hora_salida_prg"] = rbt.new_map()
     return catalog
 
 # Funciones para la carga de datos
@@ -31,45 +33,65 @@ def load_data(catalog, filename):
     Carga los datos del reto
     """
     start = get_time()
-    
+    trayectos = 0
     vuelos = filename
     input_file = csv.DictReader(open(vuelos, encoding='utf-8'))
+    #El DictReader me da un diccionario por defecto de cada línea, donde sus llaves son las columnas
     
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
-        # Creamos un diccionario con la info del vuelo
-        vuelo = {
-            "id": int(viaje["id"]),
-            "date": viaje["date"],
-            "dep_time": viaje["dep_time"],
-            "sched_dep_time": viaje["sched_dep_time"],
-            "arr_time": viaje["arr_time"],
-            "sched_arr_time": viaje["sched_arr_time"],
-            "carrier": viaje["carrier"],
-            "flight": int(viaje["flight"]),
-            "tailnum": viaje["tailnum"],
-            "origin": viaje["origin"],
-            "dest": viaje["dest"],
-            "air_time": int(viaje["air_time"]),
-            "distance": int(viaje["distance"]),
-            "name": viaje["name"]
-        }
-
-        # Insertamos en el árbol rojo-negro usando el la fecha y hora de salida como llave
-        rbt.put(catalog["viajes"])# key=(vuelo["date"]), value=vuelo)
-        carrier= viaje["carrier"]
-        if carrier not in catalog["aereolinea"]:
-            #hacerle hash al carrier?? e ingresarlo al rbt de aereolinea
-            pass
-        dest = viaje["dest"]
-        if dest not in catalog["destino"]:
-            #hacerle hash al destino?? e ingresarlo al rbt de aereolinea
-            pass
+        viaje["id"]= int(viaje["id"])
+        viaje["flight"]= int(viaje["flight"])
+        viaje["air_time"]= int(viaje["air_time"])
+        viaje["distance"]= int(viaje["distance"])
+        
+        trayectos += 1
+        # Insertamos el viaje en el árbol rojo-negro viajes usando la fecha como llave
+        nodo = rbt.get(catalog["viajes"], viaje["date"])
+        if nodo is None:
+            lista = sl.new_list()
+            sl.add_last(lista, viaje)
+            rbt.put(catalog["viajes"], viaje["date"], lista)
+        else:
+            lista = nodo["value"] # key=(vuelo["date"]), value=lista de vuelos)
+            sl.add_last(lista, viaje)
+        
+        # Insertamos el viaje en el mapa aerolinea usando la aerolínea como llave
+        carrier = viaje["carrier"]
+        mapa = mp.get(catalog["aerolinea"], carrier) #Obtiene el mapa de los aeropuertos de destino en esa aerolinea
+        if mapa is None:
+            n_mapa = mp.new_map()
+            mp.put(catalog["aerolinea"], carrier, n_mapa)
+        
+        lista = mp.get(mapa, viaje["dest"]) #Obtiene la lista del aeropuerto
+        if lista is None:
+            n_mapa = mp.new_map()
+            l = sl.new_list()
+            sl.add_last(l, viaje)
+            mp.put(mapa, viaje["dest"], l)
+        else:
+            sl.add_last(lista["value"], viaje)
+        
+        # Insertamos el viaje en el mapa destino usando el aeropuerto como llave
+        lista = mp.get(catalog["destino"], viaje["dest"]) 
+        if lista is None:
+            lista = sl.new_list()
+            mp.put(catalog["destino"], viaje["dest"], lista)
+        sl.add_last(lista, viaje)
+        
+        # Insertamos el viaje en el árbol rojo negro hora_salida_prg
+        hora = rbt.get(catalog["hora_salida_prg"], viaje["sched_dep_time"])
+        if hora is None:
+            l = sl.new_list()
+            sl.add_last(l, viaje)
+            rbt.put(catalog["hora_salida_prg"], viaje["sched_dep_time"], l)
+        else:
+            sl.add_last(hora, viaje)
         
     end = get_time()
     tiempo = delta_time(start, end)
     
-    return tiempo
+    return tiempo, trayectos
 
 # Funciones de consulta sobre el catálogo
 
