@@ -1,11 +1,22 @@
 import time
+import csv
+csv.field_size_limit(2147483647)
+from DataStructures.List import array_list as lt
+from DataStructures.Map import map_linear_probing as mp
+from DataStructures.Map import map_entry as me
+from DataStructures.Tree import binary_search_tree as bst
+from DataStructures.Tree import red_black_tree as rbt
+from DataStructures.Priority_queue import priority_queue as pq
+import math as math
+import datetime as datetime
 
 def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
-    #TODO: Llama a las funciónes de creación de las estructuras de datos
-    pass
+    catalog = {"viajes": None}
+    catalog["viajes"] = rbt.new_map()
+    
 
 
 # Funciones para la carga de datos
