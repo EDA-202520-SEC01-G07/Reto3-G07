@@ -3,6 +3,7 @@ default_limit = 1000
 sys.setrecursionlimit(default_limit*10)
 import tabulate as tb
 from App import logic as lg
+from DataStructures.List import array_list as lt
 
 def new_logic():
     """
@@ -66,9 +67,38 @@ def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    carrier = input("Ingrese el código de la aerolínea (por ejemplo: 'AA', 'UA'): ").upper()
+    dest = input("Ingrese el código del aeropuerto de destino (por ejemplo: 'JFK', 'LAX'): ").upper()
+    min_dist = int(input("Ingrese la distancia mínima (en millas): "))
+    max_dist = int(input("Ingrese la distancia máxima (en millas): "))
+    tiempo, total, lista = lg.req_3(control, carrier, dest, [min_dist, max_dist])
+    if total == 0:
+        print(" No se encontraron vuelos que cumplan con los criterios indicados.")
+    else:
+        print("Total de vuelos encontrados: "+ str(total))
+        print(" Tiempo de ejecución:  ms\n" + str(round(tiempo, 3)))
 
+        # Mostrar máximo 10 vuelos (5 primeros + 5 últimos)
+        datos = []
+        n = lt.size(lista)
+        for i in range(n):
+            vuelo = lt.get_element(lista, i)
+            fila = {
+                "ID": vuelo["id"],
+                "Código vuelo": vuelo["flight"],
+                "Fecha": vuelo["date"],
+                "Aerolínea": vuelo["name"],
+                "Código": vuelo["carrier"],
+                "Origen": vuelo["origin"],
+                "Destino": vuelo["dest"],
+                "Distancia": vuelo["distance"]
+            }
+            datos.append(fila)
+
+        if total > 10:
+            datos = datos[:5] + datos[-5:]
+
+        print(tb.tabulate(datos, headers="keys", tablefmt="simple_grid"))
 
 def print_req_4(control):
     """

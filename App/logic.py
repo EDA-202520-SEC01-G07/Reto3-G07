@@ -175,17 +175,26 @@ def req_2(catalog):
     pass
 
 
-def req_3(catalog, codigo_vuelo, codigo_destino, rango_distancia):
+def req_3(catalog, carrier, dest, rango_dist):
     """
     Retorna el resultado del requerimiento 3
     """
     # TODO: Modificar el requerimiento 3
     start= get_time()
     filtrado=0
-    
+    filtro=lt.new_list()
+    if mp.get(catalog["aerolinea"], carrier) is not None:
+        mapa= mp.get(catalog["aerolinea"], carrier)
+        if mp.get(mapa, dest) is not None:
+            lista= mp.get(mapa, dest)
+            for i in range (sl.size(lista)):
+                viaje= sl.get_element(lista, i)
+                if rango_dist[0]<= viaje["distance"] <= rango_dist[1]:
+                    lt.add_last(filtro, viaje)
+                    filtrado+=1
     end= get_time()
     tiempo= delta_time(start,end)
-    pass
+    return tiempo, filtrado, filtro
 
 
 def req_4(catalog):
