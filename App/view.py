@@ -38,9 +38,9 @@ def load_data(control):
     print("Viajes cargados: "+str(trayectos))
     p, u = lg.info_carga_datos(control)
     print("Primeros viajes: ")
-    print(tb.tabulate(p, headers="keys", tablefmt= "simple_grid"))
+    print(tb.tabulate(p, headers="keys", tablefmt= "fancy_grid"))
     print("\nÚltimos viajes: ")
-    print(tb.tabulate(u, headers="keys", tablefmt= "simple_grid"))
+    print(tb.tabulate(u, headers="keys", tablefmt= "fancy_grid"))
     
 def print_data(control, id):
     """
@@ -70,14 +70,14 @@ def print_req_1(control):
         for j in range(sl.size(r)-5,sl.size(r)):
             ultimos.append(sl.get_element(r,j))
         print("Primeros viajes filtrados: ")
-        print(tb.tabulate(primeros, headers="keys", tablefmt="simple_grid"))
-        print("Últimos viajes filtrados: ")
-        print(tb.tabulate(ultimos, headers="keys", tablefmt="simple_grid"))
+        print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
+        print("\nÚltimos viajes filtrados: ")
+        print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
     else:
         viajes = []
         for i in range(sl.size(r)):
             viajes.append(sl.get_element(r, i))
-        print(tb.tabulate(viajes, headers="keys", tablefmt="simple_grid"))  
+        print(tb.tabulate(viajes, headers="keys", tablefmt="fancy_grid"))  
         
 
 

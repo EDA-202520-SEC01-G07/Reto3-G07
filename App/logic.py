@@ -60,6 +60,7 @@ def load_data(catalog, filename):
         trayectos += 1
         # Insertamos el viaje en el árbol rojo-negro fecha_hora_destino usando combinando fecha y hora programada de salida como llave
         llave = dt.datetime.strptime(viaje["date"]+" "+viaje["sched_dep_time"], "%Y-%m-%d %H:%M")
+        
         nodo = rbt.get(catalog["fecha_hora_destino"], llave)
         if nodo is None:
             lista = sl.new_list()
@@ -119,7 +120,7 @@ def info_carga_datos(catalog):
     ultimos = []
     i = 0
     suma = 0
-    while i < sl.size(lista) and suma <= 5:
+    while i < sl.size(lista) and suma < 5:
         l = sl.get_element(lista, i)
         for j in range(sl.size(l)):
             elem = sl.get_element(l, j)
@@ -127,7 +128,7 @@ def info_carga_datos(catalog):
                 "Fecha": elem["date"],
                 "H salida": elem["dep_time"],
                 "H llegada":elem["arr_time"],
-                "Aerolínea": elem["carrier"]+"_"+elem["name"],
+                "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
                 "Origen": elem["origin"],
                 "Destino": elem["dest"],
@@ -138,33 +139,32 @@ def info_carga_datos(catalog):
             suma+= 1
             if suma == 5:
                 break
-        if suma == 5:
-            break
         i+= 1
-    i = sl.size(lista)-5
+        
+    i = sl.size(lista)-1
     suma = 0
-    while i < sl.size(lista) and suma <= 5:
+    while i >= 0 and suma < 5:
         l = sl.get_element(lista, i)
-        for j in range(sl.size(l)):
+        j = sl.size(l) - 1
+        while j >= 0 and suma < 5:
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
                 "H salida": elem["dep_time"],
                 "H llegada":elem["arr_time"],
-                "Aerolínea": elem["carrier"]+"_"+elem["name"],
+                "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
                 "Origen": elem["origin"],
                 "Destino": elem["dest"],
                 "Duración":elem["air_time"], 
                 "Distancia": elem["distance"]
             }
-            ultimos.append(viaje)
+            ultimos.insert(0,viaje)
             suma+= 1
+            j -= 1
             if suma == 5:
                 break
-        if suma == 5:
-            break
-        i+= 1
+        i-= 1
     return primeros, ultimos
     
     
@@ -196,7 +196,7 @@ def req_1(catalog, aerolinea, rango):
                 trayectos += 1
                 viaje = {"Id": elem["id"],
                          "Fecha": elem["date"],
-                         "Nombre Aerol": elem["name"] +" - "+ elem["carrier"],
+                         "Nombre Aerolínea + Código": elem["name"] +" - "+ elem["carrier"],
                          "Origen": elem["origin"],
                          "Destino": elem["dest"],
                          "Retraso": retraso                    
@@ -251,9 +251,12 @@ def req_5(catalog):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(catalog):
+def req_6(catalog, rango_f, rango_d, m):
     """
     Retorna el resultado del requerimiento 6
+    rango_f: Rango de fechas a analizar (por ejemplo: [“2013-01-01”, “2013-03-31”]).
+    rango_d: Rango de distancias (en millas) a analizar (por ejemplo: [500, 1500]). 
+    m = Cantidad M de aerolíneas a mostrar (por ejemplo: M=5).
     """
     # TODO: Modificar el requerimiento 6
     pass
