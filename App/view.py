@@ -3,7 +3,9 @@ default_limit = 1000
 sys.setrecursionlimit(default_limit*10)
 import tabulate as tb
 from App import logic as lg
-from DataStructures.List import array_list as lt
+from DataStructures.Priority_queue import priority_queue as pq
+from DataStructures.List import single_linked_list as sl
+from DataStructures.Tree import red_black_tree as rbt
 
 def new_logic():
     """
@@ -45,14 +47,38 @@ def print_data(control, id):
         Función que imprime un dato dado su ID
     """
     #TODO: Realizar la función para imprimir un elemento
-    pass
+    
 
 def print_req_1(control):
     """
         Función que imprime la solución del Requerimiento 1 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    aerolinea = input("Diga el código de la aerolínea: ").upper()
+    a = input("Diga el mínimo del rango de minutos (a): ")
+    b = input("Diga el máximo del rango de minutos (b): ")
+    rango = [a, b]
+    tiempo, trayectos, viajes_filtrados = lg.req_1(control, aerolinea, rango)
+    print("Tiempo de ejecución: "+str(round(tiempo, 2)))
+    print("Número de viajes filtrados: "+str(trayectos))
+    r = rbt.value_set(viajes_filtrados) #Lista single linked inorder
+    if sl.size(r) >10:
+        primeros = []
+        ultimos = []
+        for i in range(5):
+            primeros.append(sl.get_element(r, i))
+        for j in range(sl.size(r)-5,sl.size(r)):
+            ultimos.append(sl.get_element(r,j))
+        print("Primeros viajes filtrados: ")
+        print(tb.tabulate(primeros, headers="keys", tablefmt="simple_grid"))
+        print("Últimos viajes filtrados: ")
+        print(tb.tabulate(ultimos, headers="keys", tablefmt="simple_grid"))
+    else:
+        viajes = []
+        for i in range(sl.size(r)):
+            viajes.append(sl.get_element(r, i))
+        print(tb.tabulate(viajes, headers="keys", tablefmt="simple_grid"))  
+        
 
 
 def print_req_2(control):

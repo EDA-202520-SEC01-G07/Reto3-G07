@@ -43,9 +43,19 @@ def load_data(catalog, filename):
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
         viaje["id"]= int(viaje["id"])
+        viaje["date"] = viaje["date"].strip()
+        viaje["dep_time"] = viaje["dep_time"].strip()
+        viaje["sched_dep_time"] = viaje["sched_dep_time"].strip()
+        viaje["arr_time"] = viaje["arr_time"].strip()
+        viaje["sched_arr_time"] = viaje["sched_arr_time"].strip()
+        viaje["carrier"] = viaje["carrier"].strip()
         viaje["flight"]= int(float(viaje["flight"]))
+        viaje["tailnum"] = viaje["tailnum"].strip()
+        viaje["origin"] = viaje["origin"].strip()
+        viaje["dest"] = viaje["dest"].strip()
         viaje["air_time"]= int(float(viaje["air_time"]))
         viaje["distance"]= int(float(viaje["distance"]))
+        viaje["name"] = viaje["name"].strip()
         
         trayectos += 1
         # Insertamos el viaje en el árbol rojo-negro fecha_hora_destino usando combinando fecha y hora programada de salida como llave
@@ -159,13 +169,43 @@ def info_carga_datos(catalog):
     
     
 # Funciones de consulta sobre el catálogo
-def req_1(catalog):
+
+### FALTA CUMPLIR CONDICIÓN DE La respuesta debe mostrarse ordenada de forma ascendente según el retraso. Si dos vuelos tienen el mismo retraso, deben organizarse de forma cronológica por fecha y hora real de salida.
+•
+def req_1(catalog, aerolinea, rango):
     """
     Retorna el resultado del requerimiento 1
+    aerolinea = Código de la aerolínea a analizar (por ejemplo: “UA”).
+    rango = Rango de minutos de retraso en salida a filtrar (por ejemplo: [10,30]).
     """
     # TODO: Modificar el requerimiento 1
-    pass
-
+    start = get_time()
+    
+    rango[0] = int(rango[0])
+    rango[1] = int(rango[1])
+    trayectos = 0
+    viajes_filtrados = rbt.new_map()
+    viajes = catalog["aerolinea"] #Mapa
+    aero = mp.get(viajes, aerolinea) #Me da un mapa de con llaves de aeropuertos
+    codigos = mp.key_set(aero)
+    for i in range(sl.size(codigos)):
+        lista = mp.get(aero, lt.get_element(codigos, i))
+        for j in range(sl.size(lista)):
+            elem = sl.get_element(lista, j)
+            retraso = diferencia_tiempo(elem["dep_time"], elem["sched_dep_time"])
+            if rango[0] <= retraso and rango[1] >= retraso:
+                trayectos += 1
+                viaje = {"Id": elem["id"],
+                         "Fecha": elem["date"],
+                         "Nombre Aerol": elem["name"] +" - "+ elem["carrier"],
+                         "Origen": elem["origin"],
+                         "Destino": elem["dest"],
+                         "Retraso": retraso                    
+                }
+                rbt.put(viajes_filtrados, retraso, viaje)
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, trayectos, viajes_filtrados
 
 def req_2(catalog):
     """
@@ -235,3 +275,13 @@ def delta_time(start, end):
     """
     elapsed = float(end - start)
     return elapsed
+
+def diferencia_tiempo(real, programado):
+    r = real.split(":")
+    min1 = int(r[0])*60+int(r[1])
+    p = programado.split(":")
+    min2 = int(p[0])*60+int(p[1])
+    diferencia = min1 - min2
+    if diferencia < -720:
+        diferencia += 1440
+    return diferencia
