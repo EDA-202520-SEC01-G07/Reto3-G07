@@ -171,7 +171,6 @@ def info_carga_datos(catalog):
 # Funciones de consulta sobre el catálogo
 
 ### FALTA CUMPLIR CONDICIÓN DE La respuesta debe mostrarse ordenada de forma ascendente según el retraso. Si dos vuelos tienen el mismo retraso, deben organizarse de forma cronológica por fecha y hora real de salida.
-•
 def req_1(catalog, aerolinea, rango):
     """
     Retorna el resultado del requerimiento 1
