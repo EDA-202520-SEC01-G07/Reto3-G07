@@ -236,13 +236,97 @@ def req_3(catalog, carrier, dest, rango_dist):
     return tiempo, filtrado, filtro
 
 
-def req_4(catalog):
+def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, franja_hora_salida_dos, cant_aereolineas_mas_vuelos):
     """
     Retorna el resultado del requerimiento 4
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    start= get_time()
+    # 1 Filtrar los vuelos por rango de fechas y franja horaria de salida
+    rango_fecha_ini = dt.datetime.strptime(rango_fecha_ini, "%Y-%m-%d")
+    rango_fecha_fin = dt.datetime.strptime(rango_fecha_fin, "%Y-%m-%d")
+    resultado = lt.new_list()
 
+    if rbt.get (catalog["viajes"],rango_fecha_ini) is not None or rbt.get (catalog["viajes"],rango_fecha_fin) is not None:
+        list_por_fecha = rbt.values(catalog["viajes"], rango_fecha_ini, rango_fecha_fin)
+        list_por_fanja = lt.new_list()
+        for i in range(sl.size(list_por_fecha)):
+            lista_dia = sl.get_element(list_por_fecha, i)
+            for j in range(sl.size(lista_dia)):
+                vuelo = sl.get_element(lista_dia, j)
+                if franja_hora_salida_uno <= vuelo["sched_dep_time"] <= franja_hora_salida_dos:
+                    lt.add_last(list_por_fanja, vuelo)
+        # 2 Agrupar los vuelos por aerolínea
+        aereolineas = {}
+        for i in range(lt.size(list_por_fanja)):
+            vuelo = lt.get_element(list_por_fanja, i)
+            codigo = vuelo["carrier"]
+            if codigo in aereolineas:
+                aereolineas[codigo]["count"] += 1
+                aereolineas[codigo]["suma_duracion"] += int(vuelo["air_time"])
+                aereolineas[codigo]["suma_distancia"] += int(vuelo["distance"])
+                lt.add_last(aereolineas[codigo]["lista_vuelos"], vuelo)
+            else:
+                aereolineas[codigo] = {
+                    "count": 1,
+                    "suma_duracion": int(vuelo["air_time"]),
+                    "suma_distancia": int(vuelo["distance"]),
+                    "lista_vuelos": lt.new_list()
+                }
+                lt.add_last(aereolineas[codigo]["lista_vuelos"], vuelo)
+
+        # 3 Insertar las aerolíneas en un heap (máximo por cantidad de vuelos)
+        aereo = pq.new_heap(is_min_pq=False)
+        for codigo in aereolineas:
+            pq.insert(aereo, aereolineas[codigo]["count"], codigo)
+
+        # 4 Extraer las top N aerolíneas
+        resultado = lt.new_list()
+        n = min(cant_aereolineas_mas_vuelos, pq.size(aereo))
+        for _ in range(n):  
+            codigo = pq.get_first_priority(aereo) # Devuelve un diccionario con priority y value
+            info = aereolineas[codigo]
+
+            # 5 Calcular promedios
+            prom_duracion = info["suma_duracion"] / info["count"]
+            prom_distancia = info["suma_distancia"] / info["count"]
+
+            # 6 Encontrar vuelo con menor duración
+            menor = None
+            dur_menor = 999999
+            fecha_menor = None
+
+            for j in range(lt.size(info["lista_vuelos"])):
+                vuelo = lt.get_element(info["lista_vuelos"], j)
+                dur = int(vuelo["air_time"])
+                fecha_hora = dt.datetime.strptime(
+                    vuelo["date"] + " " + vuelo["sched_dep_time"], "%Y-%m-%d %H:%M"
+                )
+
+                if dur < dur_menor or (dur == dur_menor and fecha_menor and fecha_hora < fecha_menor):
+                    menor = vuelo
+                    dur_menor = dur
+                    fecha_menor = fecha_hora
+
+            # 7 Agregar al resultado
+            lt.add_last(resultado, {
+                "Aerolínea": codigo,
+                "Vuelos totales": info["count"],
+                "Duración promedio": round(prom_duracion, 2),
+                "Distancia promedio": round(prom_distancia, 2),
+                "Vuelo menor duración": {
+                    "ID": menor["id"],
+                    "Código": menor["flight"],
+                    "Fecha salida": menor["date"] + " " + menor["sched_dep_time"],
+                    "Origen": menor["origin"],
+                    "Destino": menor["dest"],
+                    "Duración": menor["air_time"]
+                }
+            })
+                
+        
+    end= get_time()
+    tiempo= delta_time(start,end)
+    return tiempo, lt.size(resultado), resultado
 
 def req_5(catalog):
     """

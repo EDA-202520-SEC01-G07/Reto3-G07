@@ -130,8 +130,61 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
-    pass
+    print("\n=== Requerimiento 4 ===")
+    print("Identificar las N aerolíneas con mayor número de vuelos y su vuelo de menor duración.\n")
+
+    # Solicitar parámetros
+    fecha_ini = input("Ingrese la fecha inicial (YYYY-MM-DD): ").strip()
+    fecha_fin = input("Ingrese la fecha final (YYYY-MM-DD): ").strip()
+    hora_ini = input("Ingrese la hora inicial (HH:MM): ").strip()
+    hora_fin = input("Ingrese la hora final (HH:MM): ").strip()
+    n = int(input("Ingrese la cantidad de aerolíneas a mostrar (N): "))
+
+    # Llamar a la función lógica
+    tiempo, total, resultado = lg.req_4(control, fecha_ini, fecha_fin, hora_ini, hora_fin, n)
+
+    # Verificar si hay resultados
+    if total == 0:
+        print("\nNo se encontraron vuelos dentro del rango indicado.")
+        return
+
+    print("\nTiempo de ejecución: ms" + str(round(tiempo, 3)))
+    print("Aerolíneas encontradas: " + str(total) + "\n")
+
+    # Crear tabla resumen principal
+    datos_tabla = []
+    for i in range(lt.size(resultado)):
+        aero = lt.get_element(resultado, i)
+        fila = {
+            "Aerolínea": aero["Aerolínea"],
+            "Vuelos totales": aero["Vuelos totales"],
+            "Duración promedio": aero["Duración promedio"],
+            "Distancia promedio": aero["Distancia promedio"]
+        }
+        datos_tabla.append(fila)
+
+    print("=== Aerolíneas con mayor número de vuelos ===")
+    print(tb.tabulate(datos_tabla, headers="keys", tablefmt="simple_grid"))
+
+    # Mostrar detalle del vuelo de menor duración por aerolínea
+    print("\n=== Vuelo con menor duración por aerolínea ===")
+    vuelos_tabla = []
+    for i in range(lt.size(resultado)):
+        aero = lt.get_element(resultado, i)
+        menor = aero["Vuelo menor duración"]
+        fila = {
+            "Aerolínea": aero["Aerolínea"],
+            "ID vuelo": menor["ID"],
+            "Código": menor["Código"],
+            "Fecha salida": menor["Fecha salida"],
+            "Origen": menor["Origen"],
+            "Destino": menor["Destino"],
+            "Duración": menor["Duración"]
+        }
+        vuelos_tabla.append(fila)
+
+    print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="simple_grid"))
+
 
 
 def print_req_5(control):
