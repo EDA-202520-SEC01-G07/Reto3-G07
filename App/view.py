@@ -33,8 +33,11 @@ def load_data(control):
     print("Datos cargados: ")
     print("Tiempo de carga (ms): "+ str(tiempo))
     print("Viajes cargados: "+str(trayectos))
-
-
+    p, u = lg.info_carga_datos(control)
+    print(tb.tabulate(p, headers="keys", tablefmt= "simple_grid"))
+    print("\n")
+    print(tb.tabulate(u, headers="keys", tablefmt= "simple_grid"))
+    
 def print_data(control, id):
     """
         Función que imprime un dato dado su ID

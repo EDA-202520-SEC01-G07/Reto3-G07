@@ -8,18 +8,20 @@ from DataStructures.Map import map_entry as me
 from DataStructures.Tree import red_black_tree as rbt
 from DataStructures.Priority_queue import priority_queue as pq
 import math as math
-import datetime as datetime
+import datetime as dt
 
 def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
     catalog = {
+        "fecha_hora_destino": None,
         "viajes": None,            # Árbol: todos los vuelos ordenados por fecha → RBT
         "aerolinea": None,        # Mapa: llave: aerolínea, valor: Mapa: Llave: Aerop Destino, Valor: Lista viajes → Sep Chaining
         "destino": None,           # Mapa: aeropuerto destino → Sep Chaining
         "hora_salida_prg": None    # Árbol: sch_dep_time → RBT
     }
+    catalog["fecha_hora_destino"] = rbt.new_map()
     catalog["viajes"] = rbt.new_map()
     catalog["aerolinea"] = mp.new_map(20, 4)
     catalog["destino"] = mp.new_map(120, 4)
@@ -46,12 +48,22 @@ def load_data(catalog, filename):
         viaje["distance"]= int(float(viaje["distance"]))
         
         trayectos += 1
-        # Insertamos el viaje en el árbol rojo-negro viajes usando la fecha como llave
-        nodo = rbt.get(catalog["viajes"], viaje["date"])
+        # Insertamos el viaje en el árbol rojo-negro fecha_hora_destino usando combinando fecha y hora programada de salida como llave
+        llave = dt.datetime.strptime(viaje["date"]+" "+viaje["sched_dep_time"], "%Y-%m-%d %H:%M")
+        nodo = rbt.get(catalog["fecha_hora_destino"], llave)
         if nodo is None:
             lista = sl.new_list()
             sl.add_last(lista, viaje)
-            rbt.put(catalog["viajes"], viaje["date"], lista)
+            rbt.put(catalog["fecha_hora_destino"], llave, lista)
+        else:
+            sl.add_last(nodo, viaje)
+            
+        # Insertamos el viaje en el árbol rojo-negro viajes usando la fecha como llave
+        nodo = rbt.get(catalog["viajes"], dt.datetime.strptime(viaje["date"], "%Y-%m-%d"))
+        if nodo is None:
+            lista = sl.new_list()
+            sl.add_last(lista, viaje)
+            rbt.put(catalog["viajes"], dt.datetime.strptime(viaje["date"], "%Y-%m-%d"), lista)
         else:
             sl.add_last(nodo, viaje)
         
@@ -79,11 +91,11 @@ def load_data(catalog, filename):
         sl.add_last(lista, viaje)
         
         # Insertamos el viaje en el árbol rojo negro hora_salida_prg
-        hora = rbt.get(catalog["hora_salida_prg"], viaje["sched_dep_time"])
+        hora = rbt.get(catalog["hora_salida_prg"], dt.datetime.strptime(viaje["sched_dep_time"], "%H:%M"))
         if hora is None:
             l = sl.new_list()
             sl.add_last(l, viaje)
-            rbt.put(catalog["hora_salida_prg"], viaje["sched_dep_time"], l)
+            rbt.put(catalog["hora_salida_prg"], dt.datetime.strptime(viaje["sched_dep_time"], "%H:%M"), l)
         else:
             sl.add_last(hora, viaje)
         
@@ -91,9 +103,62 @@ def load_data(catalog, filename):
     tiempo = delta_time(start, end)
     return tiempo, trayectos
 
+def info_carga_datos(catalog):
+    lista = rbt.value_set(catalog["fecha_hora_destino"]) #Recorre el mapa inorder y devuelve un singlelinked
+    primeros = []
+    ultimos = []
+    i = 0
+    suma = 0
+    while i < sl.size(lista) and suma <= 5:
+        l = sl.get_element(lista, i)
+        for j in range(sl.size(l)):
+            elem = sl.get_element(l, j)
+            viaje={
+                "Fecha": elem["date"],
+                "H salida": elem["dep_time"],
+                "H llegada":elem["arr_time"],
+                "Aerolínea": elem["carrier"]+"_"+elem["name"],
+                "Aeronave": elem["tailnum"],
+                "Origen": elem["origin"],
+                "Destino": elem["dest"],
+                "Duración":elem["air_time"], 
+                "Distancia": elem["distance"]
+            }
+            primeros.append(viaje)
+            suma+= 1
+            if suma == 5:
+                break
+        if suma == 5:
+            break
+        i+= 1
+    i = sl.size(lista)-5
+    suma = 0
+    while i < sl.size(lista) and suma <= 5:
+        l = sl.get_element(lista, i)
+        for j in range(sl.size(l)):
+            elem = sl.get_element(l, j)
+            viaje={
+                "Fecha": elem["date"],
+                "H salida": elem["dep_time"],
+                "H llegada":elem["arr_time"],
+                "Aerolínea": elem["carrier"]+"_"+elem["name"],
+                "Aeronave": elem["tailnum"],
+                "Origen": elem["origin"],
+                "Destino": elem["dest"],
+                "Duración":elem["air_time"], 
+                "Distancia": elem["distance"]
+            }
+            ultimos.append(viaje)
+            suma+= 1
+            if suma == 5:
+                break
+        if suma == 5:
+            break
+        i+= 1
+    return primeros, ultimos
+    
+    
 # Funciones de consulta sobre el catálogo
-
-
 def req_1(catalog):
     """
     Retorna el resultado del requerimiento 1
