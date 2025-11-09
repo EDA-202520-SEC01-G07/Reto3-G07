@@ -31,11 +31,12 @@ def load_data(control):
     file = "data/flights_"+file+".csv"
     tiempo, trayectos = lg.load_data(control, file)
     print("Datos cargados: ")
-    print("Tiempo de carga (ms): "+ str(tiempo))
+    print("Tiempo de carga (ms): "+ str(round(tiempo, 3)))
     print("Viajes cargados: "+str(trayectos))
     p, u = lg.info_carga_datos(control)
+    print("Primeros viajes: ")
     print(tb.tabulate(p, headers="keys", tablefmt= "simple_grid"))
-    print("\n")
+    print("\nÚltimos viajes: ")
     print(tb.tabulate(u, headers="keys", tablefmt= "simple_grid"))
     
 def print_data(control, id):
