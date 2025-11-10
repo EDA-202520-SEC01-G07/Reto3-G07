@@ -86,6 +86,28 @@ def print_req_2(control):
         Función que imprime la solución del Requerimiento 2 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 2
+    dest = input("Diga el código del aeropuerto de destino: ").upper()
+    rango_minutos=input("Diga el rango de minutos (min,max): ")
+    tiempo, filtrados, vuelos_filtrados = lg.req_2(control, dest, rango_minutos)
+    print("Tiempo de ejecución: "+str(round(tiempo, 2)))
+    print("Número de vuelos filtrados: "+str(filtrados))
+    r = rbt.value_set(vuelos_filtrados)
+    if sl.size(r) >10:
+        primeros = []
+        ultimos = []
+        for i in range(5):
+            primeros.append(sl.get_element(r, i))
+        for j in range(sl.size(r)-5,sl.size(r)):
+            ultimos.append(sl.get_element(r,j))
+        print("Primeros vuelos filtrados: ")
+        print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
+        print("\nÚltimos vuelos filtrados: ")
+        print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
+    else:
+        vuelos = []
+        for i in range(sl.size(r)):
+            vuelos.append(sl.get_element(r, i))
+        print(tb.tabulate(vuelos, headers="keys", tablefmt="fancy_grid"))
     pass
 
 
