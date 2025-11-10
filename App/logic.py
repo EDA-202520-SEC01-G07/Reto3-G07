@@ -42,59 +42,59 @@ def load_data(catalog, filename):
     
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
-        if viaje["id"] is None or viaje["id"] is " " or viaje["id"] is "":
+        if viaje["id"] is None or viaje["id"] == " " or viaje["id"] == "":
             viaje["id"] = "Unknown"
         viaje["id"]= int(viaje["id"])
         
-        if viaje["date"] is None or viaje["date"] is " " or viaje["date"] is "":
+        if viaje["date"] is None or viaje["date"] == " " or viaje["date"] == "":
             viaje["date"] = "Unknown"
         viaje["date"] = viaje["date"].strip()
         
-        if viaje["dep_time"] is None or viaje["dep_time"] is " " or viaje["dep_time"] is "":
+        if viaje["dep_time"] is None or viaje["dep_time"] == " " or viaje["dep_time"] == "":
             viaje["dep_time"] = "Unknown"
         viaje["dep_time"] = viaje["dep_time"].strip()
         
-        if viaje["sched_dep_time"] is None or viaje["sched_dep_time"] is " " or viaje["sched_dep_time"] is "":
+        if viaje["sched_dep_time"] is None or viaje["sched_dep_time"] == " " or viaje["sched_dep_time"] == "":
             viaje["sched_dep_time"] = "Unknown"
         viaje["sched_dep_time"] = viaje["sched_dep_time"].strip()
         
-        if viaje["arr_time"] is None or viaje["arr_time"] is " " or viaje["arr_time"] is "":
+        if viaje["arr_time"] is None or viaje["arr_time"] == " " or viaje["arr_time"] == "":
             viaje["arr_time"] = "Unknown"
         viaje["arr_time"] = viaje["arr_time"].strip()
         
-        if viaje["sched_arr_time"] is None or viaje["sched_arr_time"] is " " or viaje["sched_arr_time"] is "":
+        if viaje["sched_arr_time"] is None or viaje["sched_arr_time"] == " " or viaje["sched_arr_time"] == "":
             viaje["sched_arr_time"] = "Unknown"
         viaje["sched_arr_time"] = viaje["sched_arr_time"].strip()
         
-        if viaje["carrier"] is None or viaje["carrier"] is " " or viaje["carrier"] is "":
+        if viaje["carrier"] is None or viaje["carrier"] == " " or viaje["carrier"] == "":
             viaje["carrier"] = "Unknown"
         viaje["carrier"] = viaje["carrier"].strip()
         
-        if viaje["flight"] is None or viaje["flight"] is " " or viaje["flight"] is "":
+        if viaje["flight"] is None or viaje["flight"] == " " or viaje["flight"] == "":
             viaje["flight"] = "Unknown"
         viaje["flight"]= int(float(viaje["flight"]))
         
-        if viaje["tailnum"] is None or viaje["tailnum"] is " " or viaje["tailnum"] is "":
+        if viaje["tailnum"] is None or viaje["tailnum"] == " " or viaje["tailnum"] == "":
             viaje["tailnum"] = "Unknown"
         viaje["tailnum"] = viaje["tailnum"].strip()
         
-        if viaje["origin"] is None or viaje["origin"] is " " or viaje["origin"] is "":
+        if viaje["origin"] is None or viaje["origin"] == " " or viaje["origin"] == "":
             viaje["origin"] = "Unknown"
         viaje["origin"] = viaje["origin"].strip()
         
-        if viaje["dest"] is None or viaje["dest"] is " " or viaje["dest"] is "":
+        if viaje["dest"] is None or viaje["dest"] == " " or viaje["dest"] == "":
             viaje["dest"] = "Unknown"
         viaje["dest"] = viaje["dest"].strip()
         
-        if viaje["air_time"] is None or viaje["air_time"] is " " or viaje["air_time"] is "":
+        if viaje["air_time"] is None or viaje["air_time"] == " " or viaje["air_time"] == "":
             viaje["air_time"] = "Unknown"
         viaje["air_time"]= int(float(viaje["air_time"]))
         
-        if viaje["distance"] is None or viaje["distance"] is " " or viaje["distance"] is "":
+        if viaje["distance"] is None or viaje["distance"] == " " or viaje["distance"] == "":
             viaje["distance"] = "Unknown"
         viaje["distance"]= int(float(viaje["distance"]))
         
-        if viaje["name"] is None or viaje["name"] is " " or viaje["name"] is "":
+        if viaje["name"] is None or viaje["name"] == " " or viaje["name"] == "":
             viaje["name"] = "Unknown"
         viaje["name"] = viaje["name"].strip()
         
