@@ -212,8 +212,9 @@ def req_2(catalog,dest,rango_minutos):
     """
     # TODO: Modificar el requerimiento 2
     start= get_time()
-    rango_min= int(rango_minutos[0])
-    rango_max= int(rango_minutos[1])
+    rango_split = [p.strip() for p in rango_minutos.split(",")]
+    rango_min = int(rango_split[0])
+    rango_max = int(rango_split[1])
     filtrados=0
     vuelos_filtrados= rbt.new_map()
     vuelos_dest= mp.get(catalog["destino"], dest)
@@ -221,12 +222,17 @@ def req_2(catalog,dest,rango_minutos):
         end= get_time()
         tiempo= delta_time(start,end)
         return tiempo,0, vuelos_filtrados
+    
     vuelos=me.get_value(vuelos_dest)
     for i in range (sl.size(vuelos)):
         viaje= sl.get_element(vuelos, i)
         anticipo=diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
+        if anticipo < 0:
+            anticipo = -anticipo    # minutos de anticipo (positivo)
+        else:
+            continue
         
-        if anticipo >0 and rango_min <= anticipo <= rango_max:
+        if rango_min <= anticipo <= rango_max:
             filtrados+=1
             info={"Id": viaje["id"],
             "Codigo Vuelo": viaje["flight"],

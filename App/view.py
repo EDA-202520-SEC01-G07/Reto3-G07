@@ -85,30 +85,47 @@ def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 2
     dest = input("Diga el código del aeropuerto de destino: ").upper()
-    rango_minutos=input("Diga el rango de minutos (min,max): ")
+    rango_minutos = input("Diga el rango de minutos (min,max): ")
+
     tiempo, filtrados, vuelos_filtrados = lg.req_2(control, dest, rango_minutos)
-    print("Tiempo de ejecución: "+str(round(tiempo, 2)))
-    print("Número de vuelos filtrados: "+str(filtrados))
-    r = rbt.value_set(vuelos_filtrados)
-    if sl.size(r) >10:
-        primeros = []
-        ultimos = []
-        for i in range(5):
-            primeros.append(sl.get_element(r, i))
-        for j in range(sl.size(r)-5,sl.size(r)):
-            ultimos.append(sl.get_element(r,j))
-        print("Primeros vuelos filtrados: ")
+
+    print("\n=== Requerimiento 2: Vuelos con anticipo en destino ===")
+    print("Tiempo de ejecución (ms): " + str(round(tiempo, 2)))
+    print("Número de vuelos filtrados: " + str(filtrados))
+
+    # 1) Obtener el conjunto de valores (cada valor es una LISTA de dicts)
+    valores = rbt.value_set(vuelos_filtrados)
+
+    # 2) Aplanar a una lista simple de dicts para tabular
+    vuelos_flat = []
+    i = 0
+    while i < sl.size(valores):
+        bucket = sl.get_element(valores, i)   # bucket es una lista DISClib de diccionarios
+        j = 0
+        while j < sl.size(bucket):
+            vuelos_flat.append(sl.get_element(bucket, j))  # dict
+            j += 1
+        i += 1
+
+    # 3) Imprimir primeros 5 y últimos 5, o todos si <= 10
+    total = len(vuelos_flat)
+    if total == 0:
+        print("\nNo se encontraron vuelos en el rango indicado.")
+        return
+
+    if total > 10:
+        primeros = vuelos_flat[:5]
+        ultimos = vuelos_flat[-5:]
+
+        print("\n-- Primeros vuelos filtrados --")
         print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
-        print("\nÚltimos vuelos filtrados: ")
+
+        print("\n-- Últimos vuelos filtrados --")
         print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
     else:
-        vuelos = []
-        for i in range(sl.size(r)):
-            vuelos.append(sl.get_element(r, i))
-        print(tb.tabulate(vuelos, headers="keys", tablefmt="fancy_grid"))
-    pass
+        print("\n-- Vuelos filtrados --")
+        print(tb.tabulate(vuelos_flat, headers="keys", tablefmt="fancy_grid"))
 
 
 def print_req_3(control):
