@@ -42,19 +42,60 @@ def load_data(catalog, filename):
     
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
+        if viaje["id"] is None or viaje["id"] is " " or viaje["id"] is "":
+            viaje["id"] = "Unknown"
         viaje["id"]= int(viaje["id"])
+        
+        if viaje["date"] is None or viaje["date"] is " " or viaje["date"] is "":
+            viaje["date"] = "Unknown"
         viaje["date"] = viaje["date"].strip()
+        
+        if viaje["dep_time"] is None or viaje["dep_time"] is " " or viaje["dep_time"] is "":
+            viaje["dep_time"] = "Unknown"
         viaje["dep_time"] = viaje["dep_time"].strip()
+        
+        if viaje["sched_dep_time"] is None or viaje["sched_dep_time"] is " " or viaje["sched_dep_time"] is "":
+            viaje["sched_dep_time"] = "Unknown"
         viaje["sched_dep_time"] = viaje["sched_dep_time"].strip()
+        
+        if viaje["arr_time"] is None or viaje["arr_time"] is " " or viaje["arr_time"] is "":
+            viaje["arr_time"] = "Unknown"
         viaje["arr_time"] = viaje["arr_time"].strip()
+        
+        if viaje["sched_arr_time"] is None or viaje["sched_arr_time"] is " " or viaje["sched_arr_time"] is "":
+            viaje["sched_arr_time"] = "Unknown"
         viaje["sched_arr_time"] = viaje["sched_arr_time"].strip()
+        
+        if viaje["carrier"] is None or viaje["carrier"] is " " or viaje["carrier"] is "":
+            viaje["carrier"] = "Unknown"
         viaje["carrier"] = viaje["carrier"].strip()
+        
+        if viaje["flight"] is None or viaje["flight"] is " " or viaje["flight"] is "":
+            viaje["flight"] = "Unknown"
         viaje["flight"]= int(float(viaje["flight"]))
+        
+        if viaje["tailnum"] is None or viaje["tailnum"] is " " or viaje["tailnum"] is "":
+            viaje["tailnum"] = "Unknown"
         viaje["tailnum"] = viaje["tailnum"].strip()
+        
+        if viaje["origin"] is None or viaje["origin"] is " " or viaje["origin"] is "":
+            viaje["origin"] = "Unknown"
         viaje["origin"] = viaje["origin"].strip()
+        
+        if viaje["dest"] is None or viaje["dest"] is " " or viaje["dest"] is "":
+            viaje["dest"] = "Unknown"
         viaje["dest"] = viaje["dest"].strip()
+        
+        if viaje["air_time"] is None or viaje["air_time"] is " " or viaje["air_time"] is "":
+            viaje["air_time"] = "Unknown"
         viaje["air_time"]= int(float(viaje["air_time"]))
+        
+        if viaje["distance"] is None or viaje["distance"] is " " or viaje["distance"] is "":
+            viaje["distance"] = "Unknown"
         viaje["distance"]= int(float(viaje["distance"]))
+        
+        if viaje["name"] is None or viaje["name"] is " " or viaje["name"] is "":
+            viaje["name"] = "Unknown"
         viaje["name"] = viaje["name"].strip()
         
         trayectos += 1
@@ -150,7 +191,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida": elem["dep_time"],
+                "H salida":elem["dep_time"],
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
