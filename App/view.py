@@ -238,17 +238,15 @@ def print_req_6(control):
     """
     # TODO: Imprimir el resultado del requerimiento 6
     print("Indique el rango de fechas: ")
-    #f1 = dt.datetime.strptime(input("Fechas mínima: "), "%Y-%m-%d")
-    #f2 = dt.datetime.strptime(input("Fecha máxima: "), "%Y-%m-%d")
-    #r_fechas = [f1, f2]
+    f1 = dt.datetime.strptime(input("Fechas mínima: "), "%Y-%m-%d")
+    f2 = dt.datetime.strptime(input("Fecha máxima: "), "%Y-%m-%d")
+    r_fechas = [f1, f2]
     print("Indique el rango de distancias: ")
-    #d1 = float(input("Distancia mínima: "))
-    #d2 = float(input("Distancia máxima: "))
-    #r_distancias = [d1, d2]
-    #m = int(input("Diga el número de aerolíneas a mostrar: "))
-    r_fechas = [dt.datetime.strptime("2013-01-01", "%Y-%m-%d"), dt.datetime.strptime("2013-03-31", "%Y-%m-%d")]
-    r_distancias = [500, 1500]
-    m = 8
+    d1 = float(input("Distancia mínima: "))
+    d2 = float(input("Distancia máxima: "))
+    r_distancias = [d1, d2]
+    m = int(input("Diga el número de aerolíneas a mostrar: "))
+    
     tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
     print("Tiempo de ejecución: "+str(round(tiempo, 3)))
     print("Aerolíneas analizadas: "+str(m))
@@ -259,7 +257,11 @@ def print_req_6(control):
     if m < len(lista):
         lista = lista[:m]
     else:
-        print("No hay "+str(m)+" viajes. Se presentan todos los viajes: ")
+        print("No hay "+str(m)+" viajes.")
+        if len(lista) == 0:
+            print("No hay ningún vuelo.")
+        else:
+            print("Se presentan todos los viajes: ")
     print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
 
 # Se crea la lógica asociado a la vista

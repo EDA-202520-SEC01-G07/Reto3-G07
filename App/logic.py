@@ -167,7 +167,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida": elem["dep_time"],
+                "H salida": elem["sched_dep_time"] + "  " + elem["dep_time"],  #ELIMINAR elem["shec_dep_time"] + "  " + 
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
@@ -191,7 +191,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida":elem["dep_time"],
+                "H salida":elem["sched_dep_time"] + "  " + elem["dep_time"],  #ELIMINAR elem["shec_dep_time"] + "  " + 
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
