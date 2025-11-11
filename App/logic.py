@@ -422,13 +422,12 @@ def req_5(catalog,rango_fecha, dest, n):
     fecha_ini= dt.datetime.strptime(fecha[0].strip(), "%Y-%m-%d")
     fecha_fin= dt.datetime.strptime(fecha[1].strip(), "%Y-%m-%d")
     
-    lista_dest= mp.get(catalog["destino"], dest)
-    if lista_dest is None:
+    lista_fechas=rbt.values(catalog["viajes"], fecha_ini, fecha_fin)
+    if destinos is None:
         end= get_time()
         tiempo= delta_time(start,end)
         return tiempo,0, vuelos_filtrados
     
-    destinos= me.get_value(lista_dest)
     for i in range (lt.size(destinos)):
         destino= lt.get_element(destinos, i)
         lista_vuelos= mp.get(lista_dest, destino)
