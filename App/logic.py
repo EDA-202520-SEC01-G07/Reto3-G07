@@ -42,19 +42,60 @@ def load_data(catalog, filename):
     
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
+        if viaje["id"] is None or viaje["id"] == " " or viaje["id"] == "":
+            viaje["id"] = "Unknown"
         viaje["id"]= int(viaje["id"])
+        
+        if viaje["date"] is None or viaje["date"] == " " or viaje["date"] == "":
+            viaje["date"] = "Unknown"
         viaje["date"] = viaje["date"].strip()
+        
+        if viaje["dep_time"] is None or viaje["dep_time"] == " " or viaje["dep_time"] == "":
+            viaje["dep_time"] = "Unknown"
         viaje["dep_time"] = viaje["dep_time"].strip()
+        
+        if viaje["sched_dep_time"] is None or viaje["sched_dep_time"] == " " or viaje["sched_dep_time"] == "":
+            viaje["sched_dep_time"] = "Unknown"
         viaje["sched_dep_time"] = viaje["sched_dep_time"].strip()
+        
+        if viaje["arr_time"] is None or viaje["arr_time"] == " " or viaje["arr_time"] == "":
+            viaje["arr_time"] = "Unknown"
         viaje["arr_time"] = viaje["arr_time"].strip()
+        
+        if viaje["sched_arr_time"] is None or viaje["sched_arr_time"] == " " or viaje["sched_arr_time"] == "":
+            viaje["sched_arr_time"] = "Unknown"
         viaje["sched_arr_time"] = viaje["sched_arr_time"].strip()
+        
+        if viaje["carrier"] is None or viaje["carrier"] == " " or viaje["carrier"] == "":
+            viaje["carrier"] = "Unknown"
         viaje["carrier"] = viaje["carrier"].strip()
+        
+        if viaje["flight"] is None or viaje["flight"] == " " or viaje["flight"] == "":
+            viaje["flight"] = "Unknown"
         viaje["flight"]= int(float(viaje["flight"]))
+        
+        if viaje["tailnum"] is None or viaje["tailnum"] == " " or viaje["tailnum"] == "":
+            viaje["tailnum"] = "Unknown"
         viaje["tailnum"] = viaje["tailnum"].strip()
+        
+        if viaje["origin"] is None or viaje["origin"] == " " or viaje["origin"] == "":
+            viaje["origin"] = "Unknown"
         viaje["origin"] = viaje["origin"].strip()
+        
+        if viaje["dest"] is None or viaje["dest"] == " " or viaje["dest"] == "":
+            viaje["dest"] = "Unknown"
         viaje["dest"] = viaje["dest"].strip()
+        
+        if viaje["air_time"] is None or viaje["air_time"] == " " or viaje["air_time"] == "":
+            viaje["air_time"] = "Unknown"
         viaje["air_time"]= int(float(viaje["air_time"]))
+        
+        if viaje["distance"] is None or viaje["distance"] == " " or viaje["distance"] == "":
+            viaje["distance"] = "Unknown"
         viaje["distance"]= int(float(viaje["distance"]))
+        
+        if viaje["name"] is None or viaje["name"] == " " or viaje["name"] == "":
+            viaje["name"] = "Unknown"
         viaje["name"] = viaje["name"].strip()
         
         trayectos += 1
@@ -150,7 +191,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida": elem["dep_time"],
+                "H salida":elem["dep_time"],
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
@@ -183,7 +224,7 @@ def req_1(catalog, aerolinea, rango):
     rango[0] = int(rango[0])
     rango[1] = int(rango[1])
     trayectos = 0
-    viajes_filtrados = rbt.new_map()
+    viajes_filtrados = pq.new_heap(True)
     viajes = catalog["aerolinea"] #Mapa
     aero = mp.get(viajes, aerolinea) #Me da un mapa de con llaves de aeropuertos
     codigos = mp.key_set(aero)
@@ -201,7 +242,7 @@ def req_1(catalog, aerolinea, rango):
                          "Destino": elem["dest"],
                          "Retraso": retraso                    
                 }
-                rbt.put(viajes_filtrados, retraso, viaje)
+                pq.insert(viajes_filtrados, retraso, viaje)
     end = get_time()
     tiempo = delta_time(start, end)
     return tiempo, trayectos, viajes_filtrados

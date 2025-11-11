@@ -36,8 +36,6 @@ def new_heap(is_min_pq=True):
     }
 
 def priority(heap, parent, child):
-    p = pqe.get_priority(parent)
-    c = pqe.get_priority(child)
     cmp = heap["cmp_function"]
     return cmp(parent, child)
  
@@ -82,8 +80,8 @@ def remove(heap):
     elemento = al.get_element(lista, 1)
     al.exchange(lista, 1, al.size(lista)-1)
     al.remove_last(lista)
-    sink(heap, 1)
     heap["size"] -= 1
+    sink(heap, 1)
     return pqe.get_value(elemento)
 
 def sink(heap, pos):
@@ -91,16 +89,14 @@ def sink(heap, pos):
     while pos*2 <= size(heap) and centinela:
         padre = al.get_element(heap["elements"], int(pos))
         hijo1 = al.get_element(heap["elements"], int(pos*2))
-        if pos*2+1 <= size(heap):
-            hijo2 = al.get_element(heap["elements"], int(pos*2+1))
-        else:
-            hijo2 = None
+        hijo2 = None
+        if (pos*2)+1 <= size(heap):
+            hijo2 = al.get_element(heap["elements"], int((pos*2)+1))
             
         prioritario = 2*pos
         if hijo2 != None:
-            x = priority(heap, hijo1, hijo2)
-            if not x: 
-                prioritario = 2*pos+1
+            if not priority(heap, hijo1, hijo2):
+                prioritario = (2*pos)+1
         
         if not priority(heap, padre, al.get_element(heap["elements"], prioritario)): #Si el hijo tiene más prioridad que el padre (False), el padre baja
             exchange(heap, pos, prioritario)
