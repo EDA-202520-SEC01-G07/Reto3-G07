@@ -236,13 +236,13 @@ def req_1(catalog, aerolinea, rango):
             if rango[0] <= retraso and rango[1] >= retraso:
                 trayectos += 1
                 viaje = {"Id": elem["id"],
-                         "Fecha": elem["date"],
+                         "Fecha": elem["date"]+" "+elem["dep_time"],  #ELIMINAR ELEM[DEP TIME]
                          "Nombre Aerolínea + Código": elem["name"] +" - "+ elem["carrier"],
                          "Origen": elem["origin"],
                          "Destino": elem["dest"],
-                         "Retraso": retraso                    
+                         "Retraso": retraso         
                 }
-                pq.insert(viajes_filtrados, retraso, viaje)
+                pq.insert(viajes_filtrados, (retraso,dt.datetime.strptime(elem["date"]+" "+elem["dep_time"], "%Y-%m-%d %H:%M")), viaje)
     end = get_time()
     tiempo = delta_time(start, end)
     return tiempo, trayectos, viajes_filtrados
@@ -532,7 +532,7 @@ def req_6(catalog, rango_f, rango_d, m):
                 "Estabilidad": round(desviacion, 2),
                 "Vuelo (Id, Código de Vuelo, F/H salida, Aerop Origen y Dest)": f"{vuelo["Id"]} | {vuelo["Código"]} | {vuelo["F-H Salida"]} | {vuelo["Origen"]} -> {vuelo["Destino"]}"
         }
-        pq.insert(aero, desviacion, info)    
+        pq.insert(aero, (desviacion, promedio), info)    
     
     end = get_time()
     tiempo = delta_time(start, end)

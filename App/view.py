@@ -255,10 +255,9 @@ def print_req_6(control):
     print("Aerolíneas analizadas: "+str(m))
     
     lista = []
-    tam = pq.size(aerolineas)
-    for i in range(tam):
+    while not pq.is_empty(aerolineas):
         lista.append(pq.remove(aerolineas))
-    if m < tam:
+    if m < len(lista):
         lista = lista[:m]
     else:
         print("No hay "+str(m)+" viajes. Se presentan todos los viajes: ")
