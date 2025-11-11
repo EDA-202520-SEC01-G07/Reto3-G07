@@ -220,7 +220,6 @@ def print_req_4(control):
             "Duración": menor["Duración"]
         }
         vuelos_tabla.append(fila)
-
     print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="simple_grid"))
 
 

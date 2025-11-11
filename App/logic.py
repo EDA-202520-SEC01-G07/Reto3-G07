@@ -330,17 +330,17 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
 
     if rbt.get (catalog["viajes"],rango_fecha_ini) is not None or rbt.get (catalog["viajes"],rango_fecha_fin) is not None:
         list_por_fecha = rbt.values(catalog["viajes"], rango_fecha_ini, rango_fecha_fin)
-        list_por_fanja = lt.new_list()
+        list_por_franja = lt.new_list()
         for i in range(sl.size(list_por_fecha)):
             lista_dia = sl.get_element(list_por_fecha, i)
             for j in range(sl.size(lista_dia)):
                 vuelo = sl.get_element(lista_dia, j)
                 if franja_hora_salida_uno <= vuelo["sched_dep_time"] <= franja_hora_salida_dos:
-                    lt.add_last(list_por_fanja, vuelo)
+                    lt.add_last(list_por_franja, vuelo)
         # 2 Agrupar los vuelos por aerolínea
         aereolineas = {}
-        for i in range(lt.size(list_por_fanja)):
-            vuelo = lt.get_element(list_por_fanja, i)
+        for i in range(lt.size(list_por_franja)):
+            vuelo = lt.get_element(list_por_franja, i)
             codigo = vuelo["carrier"]
             if codigo in aereolineas:
                 aereolineas[codigo]["count"] += 1
@@ -360,12 +360,11 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         aereo = pq.new_heap(is_min_pq=False)
         for codigo in aereolineas:
             pq.insert(aereo, aereolineas[codigo]["count"], codigo)
-
         # 4 Extraer las top N aerolíneas
         resultado = lt.new_list()
         n = min(cant_aereolineas_mas_vuelos, pq.size(aereo))
         for _ in range(n):  
-            codigo = pq.get_first_priority(aereo) # Devuelve un diccionario con priority y value
+            codigo = pq.remove(aereo) 
             info = aereolineas[codigo]
 
             # 5 Calcular promedios
@@ -408,7 +407,7 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         
     end= get_time()
     tiempo= delta_time(start,end)
-    return tiempo, lt.size(resultado), resultado
+    return tiempo, pq.size(aereo), resultado
 
 def req_5(catalog,rango_fecha, dest, n):
     """
