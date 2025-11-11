@@ -140,7 +140,7 @@ def print_req_3(control):
         print(" No se encontraron vuelos que cumplan con los criterios indicados.")
     else:
         print("Total de vuelos encontrados: "+ str(total))
-        print(" Tiempo de ejecución:  ms\n" + str(round(tiempo, 3)))
+        print(" Tiempo de ejecución [ms]: \n" + str(round(tiempo, 3)))
 
         # Mostrar máximo 10 vuelos (5 primeros + 5 últimos)
         datos = []
@@ -162,7 +162,7 @@ def print_req_3(control):
         if total > 10:
             datos = datos[:5] + datos[-5:]
 
-        print(tb.tabulate(datos, headers="keys", tablefmt="simple_grid"))
+        print(tb.tabulate(datos, headers="keys", tablefmt="fancy_grid"))
 
 def print_req_4(control):
     """
@@ -202,7 +202,7 @@ def print_req_4(control):
         datos_tabla.append(fila)
 
     print("=== Aerolíneas con mayor número de vuelos ===")
-    print(tb.tabulate(datos_tabla, headers="keys", tablefmt="simple_grid"))
+    print(tb.tabulate(datos_tabla, headers="keys", tablefmt="fancy_grid"))
 
     # Mostrar detalle del vuelo de menor duración por aerolínea
     print("\n=== Vuelo con menor duración por aerolínea ===")
@@ -220,7 +220,7 @@ def print_req_4(control):
             "Duración": menor["Duración"]
         }
         vuelos_tabla.append(fila)
-    print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="simple_grid"))
+    print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="fancy_grid"))
 
 
 
