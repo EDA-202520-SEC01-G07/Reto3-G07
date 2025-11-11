@@ -61,23 +61,20 @@ def print_req_1(control):
     tiempo, trayectos, viajes_filtrados = lg.req_1(control, aerolinea, rango)
     print("Tiempo de ejecución: "+str(round(tiempo, 2)))
     print("Número de viajes filtrados: "+str(trayectos))
-    r = rbt.value_set(viajes_filtrados) #Lista single linked inorder
-    if sl.size(r) >10:
-        primeros = []
-        ultimos = []
-        for i in range(5):
-            primeros.append(sl.get_element(r, i))
-        for j in range(sl.size(r)-5,sl.size(r)):
-            ultimos.append(sl.get_element(r,j))
+    tam =  pq.size(viajes_filtrados)
+    lista = []
+    while not pq.is_empty(viajes_filtrados):
+        lista.append(pq.remove(viajes_filtrados))
+        
+    if tam>10:
+        primeros = lista[:5]
+        ultimos = lista[-5:]
         print("Primeros viajes filtrados: ")
         print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
         print("\nÚltimos viajes filtrados: ")
         print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
     else:
-        viajes = []
-        for i in range(sl.size(r)):
-            viajes.append(sl.get_element(r, i))
-        print(tb.tabulate(viajes, headers="keys", tablefmt="fancy_grid"))  
+        print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
         
 
 

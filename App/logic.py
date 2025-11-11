@@ -224,7 +224,7 @@ def req_1(catalog, aerolinea, rango):
     rango[0] = int(rango[0])
     rango[1] = int(rango[1])
     trayectos = 0
-    viajes_filtrados = rbt.new_map()
+    viajes_filtrados = pq.new_heap(True)
     viajes = catalog["aerolinea"] #Mapa
     aero = mp.get(viajes, aerolinea) #Me da un mapa de con llaves de aeropuertos
     codigos = mp.key_set(aero)
@@ -242,7 +242,7 @@ def req_1(catalog, aerolinea, rango):
                          "Destino": elem["dest"],
                          "Retraso": retraso                    
                 }
-                rbt.put(viajes_filtrados, retraso, viaje)
+                pq.insert(viajes_filtrados, retraso, viaje)
     end = get_time()
     tiempo = delta_time(start, end)
     return tiempo, trayectos, viajes_filtrados
