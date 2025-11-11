@@ -529,8 +529,8 @@ def req_6(catalog, rango_f, rango_d, m):
         info = {"Aerolinea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
                 "# vuelos": lt.size(trayectos),
                 "Promedio (min)": round(promedio,2),
-                "Estabilidad": round(desviacion, 2), 
-                "Vuelo más cercano a prom": vuelo   
+                "Estabilidad": round(desviacion, 2),
+                "Vuelo (Id, Código de Vuelo, F/H salida, Aerop Origen y Dest)": f"{vuelo["Id"]} | {vuelo["Código"]} | {vuelo["F-H Salida"]} | {vuelo["Origen"]} -> {vuelo["Destino"]}"
         }
         pq.insert(aero, desviacion, info)    
     

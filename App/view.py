@@ -249,7 +249,7 @@ def print_req_6(control):
     #m = int(input("Diga el número de aerolíneas a mostrar: "))
     r_fechas = [dt.datetime.strptime("2013-01-01", "%Y-%m-%d"), dt.datetime.strptime("2013-03-31", "%Y-%m-%d")]
     r_distancias = [500, 1500]
-    m = 5
+    m = 8
     tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
     print("Tiempo de ejecución: "+str(round(tiempo, 3)))
     print("Aerolíneas analizadas: "+str(m))
