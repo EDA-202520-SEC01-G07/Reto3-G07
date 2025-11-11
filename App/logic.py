@@ -42,19 +42,60 @@ def load_data(catalog, filename):
     
     # Por cada fila (vuelo) del CSV
     for viaje in input_file:
+        if viaje["id"] is None or viaje["id"] == " " or viaje["id"] == "":
+            viaje["id"] = "Unknown"
         viaje["id"]= int(viaje["id"])
+        
+        if viaje["date"] is None or viaje["date"] == " " or viaje["date"] == "":
+            viaje["date"] = "Unknown"
         viaje["date"] = viaje["date"].strip()
+        
+        if viaje["dep_time"] is None or viaje["dep_time"] == " " or viaje["dep_time"] == "":
+            viaje["dep_time"] = "Unknown"
         viaje["dep_time"] = viaje["dep_time"].strip()
+        
+        if viaje["sched_dep_time"] is None or viaje["sched_dep_time"] == " " or viaje["sched_dep_time"] == "":
+            viaje["sched_dep_time"] = "Unknown"
         viaje["sched_dep_time"] = viaje["sched_dep_time"].strip()
+        
+        if viaje["arr_time"] is None or viaje["arr_time"] == " " or viaje["arr_time"] == "":
+            viaje["arr_time"] = "Unknown"
         viaje["arr_time"] = viaje["arr_time"].strip()
+        
+        if viaje["sched_arr_time"] is None or viaje["sched_arr_time"] == " " or viaje["sched_arr_time"] == "":
+            viaje["sched_arr_time"] = "Unknown"
         viaje["sched_arr_time"] = viaje["sched_arr_time"].strip()
+        
+        if viaje["carrier"] is None or viaje["carrier"] == " " or viaje["carrier"] == "":
+            viaje["carrier"] = "Unknown"
         viaje["carrier"] = viaje["carrier"].strip()
+        
+        if viaje["flight"] is None or viaje["flight"] == " " or viaje["flight"] == "":
+            viaje["flight"] = "Unknown"
         viaje["flight"]= int(float(viaje["flight"]))
+        
+        if viaje["tailnum"] is None or viaje["tailnum"] == " " or viaje["tailnum"] == "":
+            viaje["tailnum"] = "Unknown"
         viaje["tailnum"] = viaje["tailnum"].strip()
+        
+        if viaje["origin"] is None or viaje["origin"] == " " or viaje["origin"] == "":
+            viaje["origin"] = "Unknown"
         viaje["origin"] = viaje["origin"].strip()
+        
+        if viaje["dest"] is None or viaje["dest"] == " " or viaje["dest"] == "":
+            viaje["dest"] = "Unknown"
         viaje["dest"] = viaje["dest"].strip()
+        
+        if viaje["air_time"] is None or viaje["air_time"] == " " or viaje["air_time"] == "":
+            viaje["air_time"] = "Unknown"
         viaje["air_time"]= int(float(viaje["air_time"]))
+        
+        if viaje["distance"] is None or viaje["distance"] == " " or viaje["distance"] == "":
+            viaje["distance"] = "Unknown"
         viaje["distance"]= int(float(viaje["distance"]))
+        
+        if viaje["name"] is None or viaje["name"] == " " or viaje["name"] == "":
+            viaje["name"] = "Unknown"
         viaje["name"] = viaje["name"].strip()
         
         trayectos += 1
@@ -150,7 +191,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida": elem["dep_time"],
+                "H salida":elem["dep_time"],
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
@@ -183,7 +224,7 @@ def req_1(catalog, aerolinea, rango):
     rango[0] = int(rango[0])
     rango[1] = int(rango[1])
     trayectos = 0
-    viajes_filtrados = rbt.new_map()
+    viajes_filtrados = pq.new_heap(True)
     viajes = catalog["aerolinea"] #Mapa
     aero = mp.get(viajes, aerolinea) #Me da un mapa de con llaves de aeropuertos
     codigos = mp.key_set(aero)
@@ -201,17 +242,58 @@ def req_1(catalog, aerolinea, rango):
                          "Destino": elem["dest"],
                          "Retraso": retraso                    
                 }
-                rbt.put(viajes_filtrados, retraso, viaje)
+                pq.insert(viajes_filtrados, retraso, viaje)
     end = get_time()
     tiempo = delta_time(start, end)
     return tiempo, trayectos, viajes_filtrados
 
-def req_2(catalog):
+def req_2(catalog,dest,rango_minutos):
     """
     Retorna el resultado del requerimiento 2
     """
     # TODO: Modificar el requerimiento 2
-    pass
+    start= get_time()
+    rango_split = [p.strip() for p in rango_minutos.split(",")]
+    rango_min = int(rango_split[0])
+    rango_max = int(rango_split[1])
+    filtrados=0
+    vuelos_filtrados= rbt.new_map()
+    vuelos_dest= mp.get(catalog["destino"], dest)
+    if vuelos_dest is None:
+        end= get_time()
+        tiempo= delta_time(start,end)
+        return tiempo,0, vuelos_filtrados
+
+    for i in range (sl.size(vuelos_dest)):
+        viaje= sl.get_element(vuelos_dest, i)
+        anticipo=diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
+        if anticipo < 0:
+            anticipo = -anticipo    # minutos de anticipo (positivo)
+        else:
+            continue
+        
+        if rango_min <= anticipo <= rango_max:
+            filtrados+=1
+            info={"Id": viaje["id"],
+            "Codigo Vuelo": viaje["flight"],
+            "Fecha": viaje["date"],
+            "Nombre Aerolínea": viaje["name"],
+            "Codigo Aerolínea": viaje["carrier"],
+            "Origen": viaje["origin"],
+            "Destino": viaje["dest"],
+            "Anticipo llegada": anticipo}
+            mapaf=rbt.get(vuelos_filtrados, anticipo)
+            if mapaf is None:
+                lista= sl.new_list()
+                sl.add_last(lista, info)
+                rbt.put (vuelos_filtrados, anticipo, lista)
+            else:
+                sl.add_last (mapaf, info)
+                rbt.put (vuelos_filtrados, anticipo, mapaf)
+            
+    end= get_time()
+    tiempo= delta_time(start,end)
+    return tiempo, filtrados, vuelos_filtrados
 
 
 def req_3(catalog, carrier, dest, rango_dist):
@@ -327,11 +409,55 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
     tiempo= delta_time(start,end)
     return tiempo, pq.size(aereo), resultado
 
-def req_5(catalog):
+def req_5(catalog,rango_fecha, dest, n):
     """
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
+    start=get_time()
+    filtrados=0
+    vuelos_filtrados= rbt.new_map()
+    fecha=rango_fecha.split(",")
+    fecha_ini= dt.datetime.strptime(fecha[0].strip(), "%Y-%m-%d")
+    fecha_fin= dt.datetime.strptime(fecha[1].strip(), "%Y-%m-%d")
+    
+    lista_dest= mp.get(catalog["destino"], dest)
+    if lista_dest is None:
+        end= get_time()
+        tiempo= delta_time(start,end)
+        return tiempo,0, vuelos_filtrados
+    
+    destinos= me.get_value(lista_dest)
+    for i in range (lt.size(destinos)):
+        destino= lt.get_element(destinos, i)
+        lista_vuelos= mp.get(lista_dest, destino)
+        for j in range (sl.size(lista_vuelos)):
+            viaje= sl.get_element(lista_vuelos, j)
+            fecha_viaje= dt.datetime.strptime(viaje["date"], "%Y-%m-%d")
+            if fecha_ini <= fecha_viaje <= fecha_fin:
+                filtrados+=1
+                puntual= diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
+                if puntual < 0:
+                    puntual = -puntual  
+                
+                info={"Id": viaje["id"],
+                "Codigo Vuelo": viaje["flight"],
+                "Fecha": viaje["date"],
+                "Nombre Aerolínea": viaje["name"],
+                "Codigo Aerolínea": viaje["carrier"],
+                "Origen": viaje["origin"],
+                "Destino": viaje["dest"],
+                "Distancia": viaje["distance"]}
+                mapaf=rbt.get(vuelos_filtrados, viaje["distance"])
+                if mapaf is None:
+                    lista= sl.new_list()
+                    sl.add_last(lista, info)
+                    rbt.put (vuelos_filtrados, viaje["name"], lista)
+                else:
+                    sl.add_last (mapaf, info)
+                    rbt.put (vuelos_filtrados, viaje["name"], mapaf)
+    end=get_time()
+    tiempo= delta_time(start,end)
     pass
 
 def req_6(catalog, rango_f, rango_d, m):
@@ -342,7 +468,74 @@ def req_6(catalog, rango_f, rango_d, m):
     m = Cantidad M de aerolíneas a mostrar (por ejemplo: M=5).
     """
     # TODO: Modificar el requerimiento 6
-    pass
+    start = get_time()
+    aerolineas = mp.new_map(20, 4)
+    fechas = rbt.values(catalog["viajes"],rango_f[0], rango_f[1]) #Me da una lista single linked
+    for i in range(sl.size(fechas)):
+        lista_de_viajes = sl.get_element(fechas, i)
+        for j in range(sl.size(lista_de_viajes)):
+            viaje = sl.get_element( lista_de_viajes, j)
+            if rango_d[0] <= viaje["distance"] and viaje["distance"] <= rango_d[1]:
+                v = {"Id": viaje["id"],
+                    "Código": viaje["flight"],
+                    "F-H Salida": viaje["date"]+"_"+viaje["dep_time"],
+                    "Origen": viaje["origin"],
+                    "Destino": viaje["dest"]
+                    }
+                diferencia = diferencia_tiempo(viaje["dep_time"], viaje["sched_dep_time"])
+                aer = mp.get(aerolineas, viaje["carrier"]) #Obtiene el valor, en este caso un mapa con 2 datos por valor
+                if aer is None:
+                    datos = mp.new_map(2,1)
+                    diferencias_indv = lt.new_list()               
+                    trayectos = lt.new_list()
+                    lt.add_last(trayectos, v)
+                    lt.add_last(diferencias_indv, diferencia)
+                    mp.put(datos, "dif_ind", diferencias_indv)
+                    mp.put(datos, "trayectos", trayectos)
+                    
+                    mp.put(aerolineas, viaje["carrier"], datos)
+                aer = mp.get(aerolineas, viaje["carrier"])
+                lt.add_last(mp.get(aer,"dif_ind"), diferencia)
+                lt.add_last(mp.get(aer, "trayectos"), v)
+    #Termino de llenar todos los viajes que pasan el filtro y sus datos
+    
+    #Calcular desviación estandar y promedio
+    promedio = 0
+    desviacion = 0
+    aero = pq.new_heap(True)
+    for i in range(mp.size(aerolineas)):
+        mapa = mp.get(aerolineas, lt.get_element(mp.key_set(aerolineas), i))
+        lista = mp.get(mapa, "dif_ind")
+        trayectos = mp.get(mapa, "trayectos")
+        t = 0
+        suma = 0
+        for j in range(lt.size(lista)):
+            t += 1
+            suma += lt.get_element(lista, j)
+        promedio = suma/t
+        t = 0
+        suma = 0
+        menor = 9999999999
+        vuelo = None
+        for j in range(lt.size(lista)):
+            if lt.get_element(lista, j) < menor:
+                menor = lt.get_element(lista, j)
+                vuelo = lt.get_element(trayectos, j)
+            t += 1
+            suma += (lt.get_element(lista, j) - promedio)**2
+        desviacion = math.sqrt(suma/t)        
+        
+        info = {"Aerolinea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
+                "# vuelos": lt.size(trayectos),
+                "Promedio (min)": round(promedio,2),
+                "Estabilidad": round(desviacion, 2),
+                "Vuelo (Id, Código de Vuelo, F/H salida, Aerop Origen y Dest)": f"{vuelo["Id"]} | {vuelo["Código"]} | {vuelo["F-H Salida"]} | {vuelo["Origen"]} -> {vuelo["Destino"]}"
+        }
+        pq.insert(aero, desviacion, info)    
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, aero
 
 
 # Funciones para medir tiempos de ejecucion

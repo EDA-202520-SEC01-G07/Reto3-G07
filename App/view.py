@@ -7,6 +7,8 @@ from DataStructures.Priority_queue import priority_queue as pq
 from DataStructures.List import single_linked_list as sl
 from DataStructures.Tree import red_black_tree as rbt
 from DataStructures.List import array_list as lt
+import datetime as dt
+
 def new_logic():
     """
         Se crea una instancia del controlador
@@ -61,23 +63,20 @@ def print_req_1(control):
     tiempo, trayectos, viajes_filtrados = lg.req_1(control, aerolinea, rango)
     print("Tiempo de ejecución: "+str(round(tiempo, 2)))
     print("Número de viajes filtrados: "+str(trayectos))
-    r = rbt.value_set(viajes_filtrados) #Lista single linked inorder
-    if sl.size(r) >10:
-        primeros = []
-        ultimos = []
-        for i in range(5):
-            primeros.append(sl.get_element(r, i))
-        for j in range(sl.size(r)-5,sl.size(r)):
-            ultimos.append(sl.get_element(r,j))
+    tam =  pq.size(viajes_filtrados)
+    lista = []
+    while not pq.is_empty(viajes_filtrados):
+        lista.append(pq.remove(viajes_filtrados))
+        
+    if tam>10:
+        primeros = lista[:5]
+        ultimos = lista[-5:]
         print("Primeros viajes filtrados: ")
         print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
         print("\nÚltimos viajes filtrados: ")
         print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
     else:
-        viajes = []
-        for i in range(sl.size(r)):
-            viajes.append(sl.get_element(r, i))
-        print(tb.tabulate(viajes, headers="keys", tablefmt="fancy_grid"))  
+        print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
         
 
 
@@ -85,8 +84,47 @@ def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 2
-    pass
+    dest = input("Diga el código del aeropuerto de destino: ").upper()
+    rango_minutos = input("Diga el rango de minutos (min,max): ")
+
+    tiempo, filtrados, vuelos_filtrados = lg.req_2(control, dest, rango_minutos)
+
+    print("\n=== Requerimiento 2: Vuelos con anticipo en destino ===")
+    print("Tiempo de ejecución (ms): " + str(round(tiempo, 2)))
+    print("Número de vuelos filtrados: " + str(filtrados))
+
+    # 1) Obtener el conjunto de valores (cada valor es una LISTA de dicts)
+    valores = rbt.value_set(vuelos_filtrados)
+
+    # 2) Aplanar a una lista simple de dicts para tabular
+    vuelos_flat = []
+    i = 0
+    while i < sl.size(valores):
+        bucket = sl.get_element(valores, i)   # bucket es una lista DISClib de diccionarios
+        j = 0
+        while j < sl.size(bucket):
+            vuelos_flat.append(sl.get_element(bucket, j))  # dict
+            j += 1
+        i += 1
+
+    # 3) Imprimir primeros 5 y últimos 5, o todos si <= 10
+    total = len(vuelos_flat)
+    if total == 0:
+        print("\nNo se encontraron vuelos en el rango indicado.")
+        return
+
+    if total > 10:
+        primeros = vuelos_flat[:5]
+        ultimos = vuelos_flat[-5:]
+
+        print("\n-- Primeros vuelos filtrados --")
+        print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
+
+        print("\n-- Últimos vuelos filtrados --")
+        print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
+    else:
+        print("\n-- Vuelos filtrados --")
+        print(tb.tabulate(vuelos_flat, headers="keys", tablefmt="fancy_grid"))
 
 
 def print_req_3(control):
@@ -199,7 +237,31 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    print("Indique el rango de fechas: ")
+    #f1 = dt.datetime.strptime(input("Fechas mínima: "), "%Y-%m-%d")
+    #f2 = dt.datetime.strptime(input("Fecha máxima: "), "%Y-%m-%d")
+    #r_fechas = [f1, f2]
+    print("Indique el rango de distancias: ")
+    #d1 = float(input("Distancia mínima: "))
+    #d2 = float(input("Distancia máxima: "))
+    #r_distancias = [d1, d2]
+    #m = int(input("Diga el número de aerolíneas a mostrar: "))
+    r_fechas = [dt.datetime.strptime("2013-01-01", "%Y-%m-%d"), dt.datetime.strptime("2013-03-31", "%Y-%m-%d")]
+    r_distancias = [500, 1500]
+    m = 8
+    tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
+    print("Tiempo de ejecución: "+str(round(tiempo, 3)))
+    print("Aerolíneas analizadas: "+str(m))
+    
+    lista = []
+    tam = pq.size(aerolineas)
+    for i in range(tam):
+        lista.append(pq.remove(aerolineas))
+    if m < tam:
+        lista = lista[:m]
+    else:
+        print("No hay "+str(m)+" viajes. Se presentan todos los viajes: ")
+    print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -232,7 +294,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:
