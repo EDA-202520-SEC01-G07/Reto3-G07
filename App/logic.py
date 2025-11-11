@@ -167,7 +167,7 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida": elem["sched_dep_time"] + "  " + elem["dep_time"],  #ELIMINAR elem["shec_dep_time"] + "  " + 
+                "H salida": elem["dep_time"],
                 "H llegada":elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
@@ -191,8 +191,8 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida":elem["sched_dep_time"] + "  " + elem["dep_time"],  #ELIMINAR elem["shec_dep_time"] + "  " + 
-                "H llegada":elem["arr_time"],
+                "H salida": elem["dep_time"],  
+                "H llegada": elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
                 "Origen": elem["origin"],
@@ -211,7 +211,6 @@ def info_carga_datos(catalog):
     
 # Funciones de consulta sobre el catálogo
 
-### FALTA CUMPLIR CONDICIÓN DE La respuesta debe mostrarse ordenada de forma ascendente según el retraso. Si dos vuelos tienen el mismo retraso, deben organizarse de forma cronológica por fecha y hora real de salida.
 def req_1(catalog, aerolinea, rango):
     """
     Retorna el resultado del requerimiento 1
@@ -236,7 +235,7 @@ def req_1(catalog, aerolinea, rango):
             if rango[0] <= retraso and rango[1] >= retraso:
                 trayectos += 1
                 viaje = {"Id": elem["id"],
-                         "Fecha": elem["date"]+" "+elem["dep_time"],  #ELIMINAR ELEM[DEP TIME]
+                         "Fecha": elem["date"],
                          "Nombre Aerolínea + Código": elem["name"] +" - "+ elem["carrier"],
                          "Origen": elem["origin"],
                          "Destino": elem["dest"],
@@ -359,7 +358,7 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         # 3 Insertar las aerolíneas en un heap (máximo por cantidad de vuelos)
         aereo = pq.new_heap(is_min_pq=False)
         for codigo in aereolineas:
-            pq.insert(aereo, aereolineas[codigo]["count"], codigo)
+            pq.insert(aereo, (aereolineas[codigo]["count"], codigo), codigo)
         # 4 Extraer las top N aerolíneas
         resultado = lt.new_list()
         n = min(cant_aereolineas_mas_vuelos, pq.size(aereo))
