@@ -2,12 +2,24 @@ from DataStructures.List import array_list as al
 from DataStructures.Priority_queue import pq_entry as pqe
 
 def default_compare_lower_value(father_node, child_node):
-    if pqe.get_priority(father_node) <= pqe.get_priority(child_node):
+    #Cambio para el reto 3 antes era <= y sin el [0] y solo el último
+    if pqe.get_priority(father_node)[0] == pqe.get_priority(child_node)[0]:
+        if pqe.get_priority(father_node)[1] <= pqe.get_priority(child_node)[1]:
+            return True
+        return False
+    # Último
+    if pqe.get_priority(father_node)[0] < pqe.get_priority(child_node)[0]:
         return True
     return False
 
 def default_compare_higher_value(father_node, child_node):
-    if pqe.get_priority(father_node) >= pqe.get_priority(child_node):
+    #Cambio para el reto 3 antes era >= y sin el [0] y solo el último
+    if pqe.get_priority(father_node)[0] == pqe.get_priority(child_node)[0]:
+        if pqe.get_priority(father_node)[1] >= pqe.get_priority(child_node)[1]:
+            return True
+        return False
+    # Último
+    if pqe.get_priority(father_node)[0] > pqe.get_priority(child_node)[0]:
         return True
     return False
 
@@ -57,8 +69,8 @@ def swim(heap, pos):
         padre = al.get_element(heap["elements"], int(pos//2))
         hijo = al.get_element(heap["elements"], int(pos))
 
-        x = priority(heap, padre, hijo) #Si true entonces Padre tiene mayor prioridad que el hijo, False el hijo tiene mayor prioridad
-        if x:#Si mi padre tiene mayor prioridad, no subo
+        #Si true entonces Padre tiene mayor prioridad que el hijo, False el hijo tiene mayor prioridad
+        if not priority(heap, padre, hijo):#Si mi padre tiene mayor prioridad, no subo
             exchange(heap, pos, int(pos//2))
             pos = pos//2
         else:

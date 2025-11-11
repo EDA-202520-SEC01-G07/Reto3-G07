@@ -191,8 +191,8 @@ def info_carga_datos(catalog):
             elem = sl.get_element(l, j)
             viaje={
                 "Fecha": elem["date"],
-                "H salida":elem["dep_time"],
-                "H llegada":elem["arr_time"],
+                "H salida": elem["dep_time"],  
+                "H llegada": elem["arr_time"],
                 "Aerolínea (Cód_Nom)": elem["carrier"]+"_"+elem["name"],
                 "Aeronave": elem["tailnum"],
                 "Origen": elem["origin"],
@@ -211,7 +211,6 @@ def info_carga_datos(catalog):
     
 # Funciones de consulta sobre el catálogo
 
-### FALTA CUMPLIR CONDICIÓN DE La respuesta debe mostrarse ordenada de forma ascendente según el retraso. Si dos vuelos tienen el mismo retraso, deben organizarse de forma cronológica por fecha y hora real de salida.
 def req_1(catalog, aerolinea, rango):
     """
     Retorna el resultado del requerimiento 1
@@ -240,9 +239,9 @@ def req_1(catalog, aerolinea, rango):
                          "Nombre Aerolínea + Código": elem["name"] +" - "+ elem["carrier"],
                          "Origen": elem["origin"],
                          "Destino": elem["dest"],
-                         "Retraso": retraso                    
+                         "Retraso": retraso         
                 }
-                pq.insert(viajes_filtrados, retraso, viaje)
+                pq.insert(viajes_filtrados, (retraso,dt.datetime.strptime(elem["date"]+" "+elem["dep_time"], "%Y-%m-%d %H:%M")), viaje)
     end = get_time()
     tiempo = delta_time(start, end)
     return tiempo, trayectos, viajes_filtrados
@@ -295,7 +294,17 @@ def req_2(catalog,dest,rango_minutos):
     tiempo= delta_time(start,end)
     return tiempo, filtrados, vuelos_filtrados
 
-
+def compare_viajes(v1, v2):
+    if v1["distance"] < v2["distance"]:
+        return True
+    elif v1["distance"] > v2["distance"]:
+        return False
+    else:
+        # Combinar fecha y hora en un solo string
+        fecha1 = v1["date"] + " " + v1["arr_time"]
+        fecha2 = v2["date"] + " " + v2["arr_time"]
+        return fecha1 < fecha2
+    
 def req_3(catalog, carrier, dest, rango_dist):
     """
     Retorna el resultado del requerimiento 3
@@ -313,9 +322,47 @@ def req_3(catalog, carrier, dest, rango_dist):
                 if rango_dist[0]<= viaje["distance"] <= rango_dist[1]:
                     lt.add_last(filtro, viaje)
                     filtrado+=1
+    filtro= merge_sort(filtro, compare_viajes)
     end= get_time()
     tiempo= delta_time(start,end)
     return tiempo, filtrado, filtro
+
+def merge_sort(my_list, sort_crit):
+    my_list["size"] = len(my_list["elements"])
+    if my_list["size"] <= 1:
+        return my_list
+    mitad = my_list["size"] // 2
+    #  sub_list(pos, num) → num = cantidad de elementos, no fin
+    izq = lt.sub_list(my_list, 0, mitad)
+    dere = lt.sub_list(my_list, mitad, my_list["size"] - mitad)
+    mitad_izqui = merge_sort(izq, sort_crit)
+    mitad_dere = merge_sort(dere, sort_crit)
+    return merge(mitad_izqui, mitad_dere, sort_crit)
+
+
+def merge(list_1, list_2, sort_crit):
+    l = 0
+    r = 0
+    merged_list = lt.new_list()
+    while l < list_1["size"] and r < list_2["size"]:
+        ei = lt.get_element(list_1, l)
+        ed = lt.get_element(list_2, r)
+        if sort_crit(ei, ed):
+            lt.add_last(merged_list, ei)
+            l += 1
+        else:
+            lt.add_last(merged_list, ed)
+            r += 1
+    #  Añadir los elementos sobrantes de list_1
+    while l < list_1["size"]:
+        lt.add_last(merged_list, lt.get_element(list_1, l))
+        l += 1
+    #  Añadir los elementos sobrantes de list_2
+    while r < list_2["size"]:
+        lt.add_last(merged_list, lt.get_element(list_2, r))
+        r += 1
+    merged_list["size"] = len(merged_list["elements"])
+    return merged_list
 
 
 def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, franja_hora_salida_dos, cant_aereolineas_mas_vuelos):
@@ -330,17 +377,17 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
 
     if rbt.get (catalog["viajes"],rango_fecha_ini) is not None or rbt.get (catalog["viajes"],rango_fecha_fin) is not None:
         list_por_fecha = rbt.values(catalog["viajes"], rango_fecha_ini, rango_fecha_fin)
-        list_por_fanja = lt.new_list()
+        list_por_franja = lt.new_list()
         for i in range(sl.size(list_por_fecha)):
             lista_dia = sl.get_element(list_por_fecha, i)
             for j in range(sl.size(lista_dia)):
                 vuelo = sl.get_element(lista_dia, j)
                 if franja_hora_salida_uno <= vuelo["sched_dep_time"] <= franja_hora_salida_dos:
-                    lt.add_last(list_por_fanja, vuelo)
+                    lt.add_last(list_por_franja, vuelo)
         # 2 Agrupar los vuelos por aerolínea
         aereolineas = {}
-        for i in range(lt.size(list_por_fanja)):
-            vuelo = lt.get_element(list_por_fanja, i)
+        for i in range(lt.size(list_por_franja)):
+            vuelo = lt.get_element(list_por_franja, i)
             codigo = vuelo["carrier"]
             if codigo in aereolineas:
                 aereolineas[codigo]["count"] += 1
@@ -359,13 +406,12 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         # 3 Insertar las aerolíneas en un heap (máximo por cantidad de vuelos)
         aereo = pq.new_heap(is_min_pq=False)
         for codigo in aereolineas:
-            pq.insert(aereo, aereolineas[codigo]["count"], codigo)
-
+            pq.insert(aereo, (aereolineas[codigo]["count"],codigo), codigo)
         # 4 Extraer las top N aerolíneas
         resultado = lt.new_list()
         n = min(cant_aereolineas_mas_vuelos, pq.size(aereo))
         for _ in range(n):  
-            codigo = pq.get_first_priority(aereo) # Devuelve un diccionario con priority y value
+            codigo = pq.remove(aereo) 
             info = aereolineas[codigo]
 
             # 5 Calcular promedios
@@ -408,7 +454,7 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         
     end= get_time()
     tiempo= delta_time(start,end)
-    return tiempo, lt.size(resultado), resultado
+    return tiempo, pq.size(aereo), resultado
 
 def req_5(catalog,rango_fecha, dest, n):
     """
@@ -468,7 +514,82 @@ def req_6(catalog, rango_f, rango_d, m):
     m = Cantidad M de aerolíneas a mostrar (por ejemplo: M=5).
     """
     # TODO: Modificar el requerimiento 6
-    pass
+    start = get_time()
+    aerolineas = mp.new_map(20, 4)
+    fechas = rbt.values(catalog["viajes"],rango_f[0], rango_f[1]) #Me da una lista single linked
+    for i in range(sl.size(fechas)):
+        lista_de_viajes = sl.get_element(fechas, i)
+        for j in range(sl.size(lista_de_viajes)):
+            viaje = sl.get_element(lista_de_viajes, j)
+            if rango_d[0] <= viaje["distance"] and viaje["distance"] <= rango_d[1]:
+                v = {"Id": viaje["id"],
+                    "Código": viaje["flight"],
+                    "F-H Salida": viaje["date"]+" "+viaje["dep_time"],
+                    "Origen": viaje["origin"],
+                    "Destino": viaje["dest"]
+                    }
+                diferencia = diferencia_tiempo(viaje["dep_time"], viaje["sched_dep_time"])
+                aer = mp.get(aerolineas, viaje["carrier"]) #Obtiene el valor, en este caso un mapa con 2 datos por valor
+                if aer is None:
+                    datos = mp.new_map(2,1)
+                    diferencias_indv = lt.new_list()               
+                    trayectos = lt.new_list()
+                    lt.add_last(trayectos, v)
+                    lt.add_last(diferencias_indv, diferencia)
+                    mp.put(datos, "dif_ind", diferencias_indv)
+                    mp.put(datos, "trayectos", trayectos)
+                    
+                    mp.put(aerolineas, viaje["carrier"], datos)
+                aer = mp.get(aerolineas, viaje["carrier"])
+                lt.add_last(mp.get(aer,"dif_ind"), diferencia)
+                lt.add_last(mp.get(aer, "trayectos"), v)
+    #Termino de llenar todos los viajes que pasan el filtro y sus datos
+    
+    #Calcular desviación estandar y promedio
+    promedio = 0
+    desviacion = 0
+    aero = pq.new_heap(True)
+    clave=mp.key_set(aerolineas)
+    for i in range(mp.size(aerolineas)):
+        mapa = mp.get(aerolineas, lt.get_element(clave, i))
+        lista = mp.get(mapa, "dif_ind")
+        trayectos = mp.get(mapa, "trayectos")
+        t = 0
+        suma = 0
+        for j in range(lt.size(lista)):
+            t += 1
+            suma += lt.get_element(lista, j)
+        if t>0:
+            promedio = suma/t
+        else:
+            promedio = 0
+        t = 0
+        suma = 0
+        menor = 9999999999
+        vuelo = None
+        for j in range(lt.size(lista)):
+            d=abs(promedio-lt.get_element(lista, j))
+            if d < menor:
+                menor = d
+                vuelo = lt.get_element(trayectos, j)
+            t += 1
+            suma += (lt.get_element(lista, j) - promedio)**2
+        if t>0:
+            desviacion = math.sqrt(suma/t)
+        else:
+            desviacion=0
+        
+        info = {"Aerolínea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
+                "# vuelos": lt.size(trayectos),
+                "Promedio (min)": round(promedio,2),
+                "Estabilidad": round(desviacion, 2),
+                "Vuelo (Id, Código de Vuelo, F/H salida, Aerop Origen y Dest)": f"{vuelo["Id"]} | {vuelo["Código"]} | {vuelo["F-H Salida"]} | {vuelo["Origen"]} -> {vuelo["Destino"]}"
+        }
+        pq.insert(aero, (desviacion, promedio), info)    
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, aero
 
 
 # Funciones para medir tiempos de ejecucion

@@ -7,6 +7,8 @@ from DataStructures.Priority_queue import priority_queue as pq
 from DataStructures.List import single_linked_list as sl
 from DataStructures.Tree import red_black_tree as rbt
 from DataStructures.List import array_list as lt
+import datetime as dt
+
 def new_logic():
     """
         Se crea una instancia del controlador
@@ -30,7 +32,7 @@ def load_data(control):
     Carga los datos
     """
     #TODO: Realizar la carga de datos
-    file = input('Diga el archivo que quiere evaluar (small, medium, large)\n').strip()
+    file = input('Diga el archivo que quiere evaluar (small, medium, large)\n').strip().lower()
     file = "data/flights_"+file+".csv"
     tiempo, trayectos = lg.load_data(control, file)
     print("Datos cargados: ")
@@ -138,7 +140,7 @@ def print_req_3(control):
         print(" No se encontraron vuelos que cumplan con los criterios indicados.")
     else:
         print("Total de vuelos encontrados: "+ str(total))
-        print(" Tiempo de ejecución:  ms\n" + str(round(tiempo, 3)))
+        print(" Tiempo de ejecución [ms]: \n" + str(round(tiempo, 3)))
 
         # Mostrar máximo 10 vuelos (5 primeros + 5 últimos)
         datos = []
@@ -160,7 +162,7 @@ def print_req_3(control):
         if total > 10:
             datos = datos[:5] + datos[-5:]
 
-        print(tb.tabulate(datos, headers="keys", tablefmt="simple_grid"))
+        print(tb.tabulate(datos, headers="keys", tablefmt="fancy_grid"))
 
 def print_req_4(control):
     """
@@ -200,7 +202,7 @@ def print_req_4(control):
         datos_tabla.append(fila)
 
     print("=== Aerolíneas con mayor número de vuelos ===")
-    print(tb.tabulate(datos_tabla, headers="keys", tablefmt="simple_grid"))
+    print(tb.tabulate(datos_tabla, headers="keys", tablefmt="fancy_grid"))
 
     # Mostrar detalle del vuelo de menor duración por aerolínea
     print("\n=== Vuelo con menor duración por aerolínea ===")
@@ -218,8 +220,7 @@ def print_req_4(control):
             "Duración": menor["Duración"]
         }
         vuelos_tabla.append(fila)
-
-    print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="simple_grid"))
+    print(tb.tabulate(vuelos_tabla, headers="keys", tablefmt="fancy_grid"))
 
 
 
@@ -236,7 +237,32 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    print("Indique el rango de fechas: ")
+    f1 = dt.datetime.strptime(input("Fechas mínima: "), "%Y-%m-%d")
+    f2 = dt.datetime.strptime(input("Fecha máxima: "), "%Y-%m-%d")
+    r_fechas = [f1, f2]
+    print("Indique el rango de distancias: ")
+    d1 = float(input("Distancia mínima: "))
+    d2 = float(input("Distancia máxima: "))
+    r_distancias = [d1, d2]
+    m = int(input("Diga el número de aerolíneas a mostrar: "))
+    
+    tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
+    print("Tiempo de ejecución: "+str(round(tiempo, 3)))
+    print("Aerolíneas analizadas: "+str(m))
+    
+    lista = []
+    while not pq.is_empty(aerolineas):
+        lista.append(pq.remove(aerolineas))
+    if m < len(lista):
+        lista = lista[:m]
+    else:
+        print("No hay "+str(m)+" viajes.")
+        if len(lista) == 0:
+            print("No hay ningún vuelo.")
+        else:
+            print("Se presentan todos los viajes: ")
+    print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -269,7 +295,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:
