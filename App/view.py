@@ -7,6 +7,8 @@ from DataStructures.Priority_queue import priority_queue as pq
 from DataStructures.List import single_linked_list as sl
 from DataStructures.Tree import red_black_tree as rbt
 from DataStructures.List import array_list as lt
+import datetime as dt
+
 def new_logic():
     """
         Se crea una instancia del controlador
@@ -236,7 +238,31 @@ def print_req_6(control):
         Función que imprime la solución del Requerimiento 6 en consola
     """
     # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    print("Indique el rango de fechas: ")
+    #f1 = dt.datetime.strptime(input("Fechas mínima: "), "%Y-%m-%d")
+    #f2 = dt.datetime.strptime(input("Fecha máxima: "), "%Y-%m-%d")
+    #r_fechas = [f1, f2]
+    print("Indique el rango de distancias: ")
+    #d1 = float(input("Distancia mínima: "))
+    #d2 = float(input("Distancia máxima: "))
+    #r_distancias = [d1, d2]
+    #m = int(input("Diga el número de aerolíneas a mostrar: "))
+    r_fechas = [dt.datetime.strptime("2013-01-01", "%Y-%m-%d"), dt.datetime.strptime("2013-03-31", "%Y-%m-%d")]
+    r_distancias = [500, 1500]
+    m = 5
+    tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
+    print("Tiempo de ejecución: "+str(round(tiempo, 3)))
+    print("Aerolíneas analizadas: "+str(m))
+    
+    lista = []
+    tam = pq.size(aerolineas)
+    for i in range(tam):
+        lista.append(pq.remove(aerolineas))
+    if m < tam:
+        lista = lista[:m]
+    else:
+        print("No hay "+str(m)+" viajes. Se presentan todos los viajes: ")
+    print(tb.tabulate(lista, headers="keys", tablefmt="fancy_grid"))
 
 # Se crea la lógica asociado a la vista
 control = new_logic()
@@ -269,7 +295,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:

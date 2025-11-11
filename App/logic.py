@@ -469,7 +469,74 @@ def req_6(catalog, rango_f, rango_d, m):
     m = Cantidad M de aerolíneas a mostrar (por ejemplo: M=5).
     """
     # TODO: Modificar el requerimiento 6
-    pass
+    start = get_time()
+    aerolineas = mp.new_map(20, 4)
+    fechas = rbt.values(catalog["viajes"],rango_f[0], rango_f[1]) #Me da una lista single linked
+    for i in range(sl.size(fechas)):
+        lista_de_viajes = sl.get_element(fechas, i)
+        for j in range(sl.size(lista_de_viajes)):
+            viaje = sl.get_element( lista_de_viajes, j)
+            if rango_d[0] <= viaje["distance"] and viaje["distance"] <= rango_d[1]:
+                v = {"Id": viaje["id"],
+                    "Código": viaje["flight"],
+                    "F-H Salida": viaje["date"]+"_"+viaje["dep_time"],
+                    "Origen": viaje["origin"],
+                    "Destino": viaje["dest"]
+                    }
+                diferencia = diferencia_tiempo(viaje["dep_time"], viaje["sched_dep_time"])
+                aer = mp.get(aerolineas, viaje["carrier"]) #Obtiene el valor, en este caso un mapa con 2 datos por valor
+                if aer is None:
+                    datos = mp.new_map(2,1)
+                    diferencias_indv = lt.new_list()               
+                    trayectos = lt.new_list()
+                    lt.add_last(trayectos, v)
+                    lt.add_last(diferencias_indv, diferencia)
+                    mp.put(datos, "dif_ind", diferencias_indv)
+                    mp.put(datos, "trayectos", trayectos)
+                    
+                    mp.put(aerolineas, viaje["carrier"], datos)
+                aer = mp.get(aerolineas, viaje["carrier"])
+                lt.add_last(mp.get(aer,"dif_ind"), diferencia)
+                lt.add_last(mp.get(aer, "trayectos"), v)
+    #Termino de llenar todos los viajes que pasan el filtro y sus datos
+    
+    #Calcular desviación estandar y promedio
+    promedio = 0
+    desviacion = 0
+    aero = pq.new_heap(True)
+    for i in range(mp.size(aerolineas)):
+        mapa = mp.get(aerolineas, lt.get_element(mp.key_set(aerolineas), i))
+        lista = mp.get(mapa, "dif_ind")
+        trayectos = mp.get(mapa, "trayectos")
+        t = 0
+        suma = 0
+        for j in range(lt.size(lista)):
+            t += 1
+            suma += lt.get_element(lista, j)
+        promedio = suma/t
+        t = 0
+        suma = 0
+        menor = 9999999999
+        vuelo = None
+        for j in range(lt.size(lista)):
+            if lt.get_element(lista, j) < menor:
+                menor = lt.get_element(lista, j)
+                vuelo = lt.get_element(trayectos, j)
+            t += 1
+            suma += (lt.get_element(lista, j) - promedio)**2
+        desviacion = math.sqrt(suma/t)        
+        
+        info = {"Aerolinea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
+                "# vuelos": lt.size(trayectos),
+                "Promedio (min)": round(promedio,2),
+                "Estabilidad": round(desviacion, 2), 
+                "Vuelo más cercano a prom": vuelo   
+        }
+        pq.insert(aero, desviacion, info)    
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, aero
 
 
 # Funciones para medir tiempos de ejecucion
