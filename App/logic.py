@@ -358,7 +358,7 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
         # 3 Insertar las aerolíneas en un heap (máximo por cantidad de vuelos)
         aereo = pq.new_heap(is_min_pq=False)
         for codigo in aereolineas:
-            pq.insert(aereo, (aereolineas[codigo]["count"], codigo), codigo)
+            pq.insert(aereo, (aereolineas[codigo]["count"],codigo), codigo)
         # 4 Extraer las top N aerolíneas
         resultado = lt.new_list()
         n = min(cant_aereolineas_mas_vuelos, pq.size(aereo))
