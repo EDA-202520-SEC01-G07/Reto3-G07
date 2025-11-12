@@ -461,50 +461,104 @@ def req_5(catalog,rango_fecha, dest, n):
     Retorna el resultado del requerimiento 5
     """
     # TODO: Modificar el requerimiento 5
-    start=get_time()
-    filtrados=0
-    vuelos_filtrados= rbt.new_map()
-    fecha=rango_fecha.split(",")
-    fecha_ini= dt.datetime.strptime(fecha[0].strip(), "%Y-%m-%d")
-    fecha_fin= dt.datetime.strptime(fecha[1].strip(), "%Y-%m-%d")
+    start = get_time()
     
-    lista_fechas=rbt.values(catalog["viajes"], fecha_ini, fecha_fin)
-    if destinos is None:
-        end= get_time()
-        tiempo= delta_time(start,end)
-        return tiempo,0, vuelos_filtrados
     
-    for i in range (lt.size(destinos)):
-        destino= lt.get_element(destinos, i)
-        lista_vuelos= mp.get(lista_dest, destino)
-        for j in range (sl.size(lista_vuelos)):
-            viaje= sl.get_element(lista_vuelos, j)
-            fecha_viaje= dt.datetime.strptime(viaje["date"], "%Y-%m-%d")
-            if fecha_ini <= fecha_viaje <= fecha_fin:
-                filtrados+=1
-                puntual= diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
-                if puntual < 0:
-                    puntual = -puntual  
-                
-                info={"Id": viaje["id"],
-                "Codigo Vuelo": viaje["flight"],
-                "Fecha": viaje["date"],
-                "Nombre Aerolínea": viaje["name"],
-                "Codigo Aerolínea": viaje["carrier"],
-                "Origen": viaje["origin"],
-                "Destino": viaje["dest"],
-                "Distancia": viaje["distance"]}
-                mapaf=rbt.get(vuelos_filtrados, viaje["distance"])
-                if mapaf is None:
-                    lista= sl.new_list()
-                    sl.add_last(lista, info)
-                    rbt.put (vuelos_filtrados, viaje["name"], lista)
+    fecha_ini = dt.datetime.strptime(rango_fecha[0], "%Y-%m-%d")
+    fecha_fin = dt.datetime.strptime(rango_fecha[1], "%Y-%m-%d")
+    lista_fechas = rbt.values(catalog["viajes"], fecha_ini, fecha_fin)
+    mapa_carrier = mp.new_map(2048, 0.5)
+    
+    i = 0
+    while i < sl.size(lista_fechas):
+        dia = sl.get_element(lista_fechas, i)
+       
+        j = 0
+        while j < sl.size(dia):
+            vuelo = sl.get_element(dia, j)
+            if vuelo["dest"] == dest:
+                dif = diferencia_tiempo(vuelo["arr_time"], vuelo["sched_arr_time"])
+                if dif < 0:
+                    dif = -dif
+                air_t = int(vuelo.get("air_time", 0)) if vuelo.get("air_time", "") != "" else 0
+                distance = float(vuelo.get("distance", 0)) if vuelo.get("distance", "") != "" else 0.0
+                carrier = vuelo["carrier"]
+                entry = mp.get(mapa_carrier, carrier)
+                if entry is None:
+                    info = {
+                        "carrier": carrier,
+                        "count": 1,
+                        "total_delay": dif,
+                        "total_air_time": air_t,
+                        "total_distance": distance,
+                        "max_flight": {
+                            "id": vuelo["id"],
+                            "flight": vuelo["flight"],
+                            "date": vuelo["date"],
+                            "dep_time": vuelo["dep_time"],
+                            "origin": vuelo["origin"],
+                            "dest": vuelo["dest"],
+                            "air_time": air_t,
+                            "distance": distance
+                        }
+                    }
+                    mp.put(mapa_carrier, carrier, info)
                 else:
-                    sl.add_last (mapaf, info)
-                    rbt.put (vuelos_filtrados, viaje["name"], mapaf)
-    end=get_time()
-    tiempo= delta_time(start,end)
-    pass
+                    info = entry
+                    info["count"] += 1
+                    info["total_delay"] += dif
+                    info["total_air_time"] += air_t
+                    info["total_distance"] += distance
+                    if distance > info["max_flight"]["distance"]:
+                        info["max_flight"] = {
+                            "id": vuelo["id"],
+                            "flight": vuelo["flight"],
+                            "date": vuelo["date"],
+                            "dep_time": vuelo["dep_time"],
+                            "origin": vuelo["origin"],
+                            "dest": vuelo["dest"],
+                            "air_time": air_t,
+                            "distance": distance
+                        }
+                    mp.put(mapa_carrier, carrier, info)
+            j += 1
+       
+    
+    resultado = rbt.new_map()
+    claves = mp.key_set(mapa_carrier)
+    total_aerolineas = lt.size(claves)
+    
+    i = 0
+    while i < total_aerolineas:
+        carrier = lt.get_element(claves, i)
+        info = me.get_value(mp.get(mapa_carrier, carrier))
+        if info["count"] > 0:
+            promedio_delay = info["total_delay"] / info["count"]
+            promedio_air_time = info["total_air_time"] / info["count"]
+            promedio_distance = info["total_distance"] / info["count"]
+            datos = {
+                "Aerolínea": carrier,
+                "Vuelos totales": info["count"],
+                "Retraso promedio llegada (min)": round(promedio_delay, 2),
+                "Duración promedio vuelo (min)": round(promedio_air_time, 2),
+                "Distancia promedio vuelo (millas)": round(promedio_distance, 2),
+                "Vuelo mayor distancia": info["max_flight"]
+            }
+            clave = int(round(promedio_delay))
+            lst = rbt.get(resultado, clave)
+            if lst is None:
+                lst = lt.new_list()
+                lt.add_last(lst, datos)
+                rbt.put(resultado, clave, lst)
+            else:
+                lt.add_last(lst, datos)
+                rbt.put(resultado, clave, lst)
+        i += 1
+    
+    end = get_time()
+    tiempo = delta_time(start, end)
+    return tiempo, total_aerolineas, resultado
+
 
 def req_6(catalog, rango_f, rango_d, m):
     """

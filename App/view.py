@@ -224,12 +224,59 @@ def print_req_4(control):
 
 
 
+
+
+
 def print_req_5(control):
     """
-        Función que imprime la solución del Requerimiento 5 en consola
+    Vista Req. 5
     """
-    # TODO: Imprimir el resultado del requerimiento 5
-    pass
+    rango = input("Rango de fechas (YYYY-MM-DD,YYYY-MM-DD): ").strip()
+    dest  = input("Código de aeropuerto destino (ej. JFK): ").upper().strip()
+    n     = int(input("Cantidad de aerolíneas a mostrar (N): ").strip())
+
+    # 1) Parsear el rango que llega como string "ini,fin"
+    partes = [p.strip() for p in rango.split(",")]
+    if len(partes) != 2:
+        print("Formato inválido. Usa: YYYY-MM-DD,YYYY-MM-DD")
+        return
+
+    # 2) Llamar al requerimiento (logic espera una secuencia con dos strings)
+    tiempo, total_aero, arbol = lg.req_5(control, partes, dest, n)
+
+    print("\n=== Requerimiento 5: Aerolíneas más puntuales (llegada) ===")
+    print("Tiempo de ejecución (ms):", round(tiempo, 2))
+    print("Aerolíneas consideradas (M):", total_aero)
+
+    # 3) Aplanar los valores del árbol (cada valor es una LISTA de dicts)
+    valores = rbt.value_set(arbol)
+    fila = []
+    i = 0
+    while i < sl.size(valores) and len(fila) < n:
+        bucket = sl.get_element(valores, i)  # lista con 1..k aerolíneas de ese promedio
+        j = 0
+        while j < sl.size(bucket) and len(fila) < n:
+            item = sl.get_element(bucket, j)  # dict con agregados de una aerolínea
+            fila.append({
+                "Carrier": item["Aerolínea"],
+                "Vuelos": item["Vuelos totales"],
+                "Retraso prom. (min)": item["Retraso promedio llegada (min)"],
+                "Duración prom. (min)": item["Duración promedio vuelo (min)"],
+                "Dist. prom. (mi)": item["Distancia promedio vuelo (millas)"],
+                "MaxDist ID": item["Vuelo mayor distancia"]["id"],
+                "MaxDist Flight": item["Vuelo mayor distancia"]["flight"],
+                "MaxDist Dist (mi)": item["Vuelo mayor distancia"]["distance"]
+            })
+            j += 1
+        i += 1
+
+    if not fila:
+        print("\nNo se encontraron aerolíneas para ese destino y rango de fechas.")
+        return
+
+    print(f"\n-- Top {len(fila)} aerolíneas --")
+    print(tb.tabulate(fila, headers="keys", tablefmt="fancy_grid"))
+
 
 
 def print_req_6(control):
