@@ -224,9 +224,6 @@ def print_req_4(control):
 
 
 
-
-
-
 def print_req_5(control):
     """
     Vista Req. 5
@@ -235,29 +232,32 @@ def print_req_5(control):
     dest  = input("Código de aeropuerto destino (ej. JFK): ").upper().strip()
     n     = int(input("Cantidad de aerolíneas a mostrar (N): ").strip())
 
-    # 1) Parsear el rango que llega como string "ini,fin"
+    # Parseo simple del rango a dos strings
     partes = [p.strip() for p in rango.split(",")]
     if len(partes) != 2:
-        print("Formato inválido. Usa: YYYY-MM-DD,YYYY-MM-DD")
+        print("❌ Formato inválido. Usa: YYYY-MM-DD,YYYY-MM-DD")
         return
 
-    # 2) Llamar al requerimiento (logic espera una secuencia con dos strings)
+    # Lógica
     tiempo, total_aero, arbol = lg.req_5(control, partes, dest, n)
 
     print("\n=== Requerimiento 5: Aerolíneas más puntuales (llegada) ===")
     print("Tiempo de ejecución (ms):", round(tiempo, 2))
     print("Aerolíneas consideradas (M):", total_aero)
 
-    # 3) Aplanar los valores del árbol (cada valor es una LISTA de dicts)
+    # values() del RBT -> lista (single_linked_list) de buckets
     valores = rbt.value_set(arbol)
-    fila = []
+
+    filas = []
     i = 0
-    while i < sl.size(valores) and len(fila) < n:
-        bucket = sl.get_element(valores, i)  # lista con 1..k aerolíneas de ese promedio
+    tam_val = sl.size(valores)  # lista externa con SL
+    while i < tam_val and len(filas) < n:
+        bucket = sl.get_element(valores, i)  # cada bucket es un array_list (lt)
         j = 0
-        while j < sl.size(bucket) and len(fila) < n:
-            item = sl.get_element(bucket, j)  # dict con agregados de una aerolínea
-            fila.append({
+        tam_b = lt.size(bucket)
+        while j < tam_b and len(filas) < n:
+            item = lt.get_element(bucket, j)  # dict agregado de una aerolínea
+            filas.append({
                 "Carrier": item["Aerolínea"],
                 "Vuelos": item["Vuelos totales"],
                 "Retraso prom. (min)": item["Retraso promedio llegada (min)"],
@@ -265,17 +265,17 @@ def print_req_5(control):
                 "Dist. prom. (mi)": item["Distancia promedio vuelo (millas)"],
                 "MaxDist ID": item["Vuelo mayor distancia"]["id"],
                 "MaxDist Flight": item["Vuelo mayor distancia"]["flight"],
-                "MaxDist Dist (mi)": item["Vuelo mayor distancia"]["distance"]
+                "MaxDist Dist (mi)": item["Vuelo mayor distancia"]["distance"],
             })
             j += 1
         i += 1
 
-    if not fila:
+    if not filas:
         print("\nNo se encontraron aerolíneas para ese destino y rango de fechas.")
         return
 
-    print(f"\n-- Top {len(fila)} aerolíneas --")
-    print(tb.tabulate(fila, headers="keys", tablefmt="fancy_grid"))
+    print(f"\n-- Top {len(filas)} aerolíneas --")
+    print(tb.tabulate(filas, headers="keys", tablefmt="fancy_grid"))
 
 
 

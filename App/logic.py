@@ -455,7 +455,6 @@ def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, fran
     end= get_time()
     tiempo= delta_time(start,end)
     return tiempo, pq.size(aereo), resultado
-
 def req_5(catalog,rango_fecha, dest, n):
     """
     Retorna el resultado del requerimiento 5
@@ -480,8 +479,8 @@ def req_5(catalog,rango_fecha, dest, n):
                 dif = diferencia_tiempo(vuelo["arr_time"], vuelo["sched_arr_time"])
                 if dif < 0:
                     dif = -dif
-                air_t = int(vuelo.get("air_time", 0)) 
-                distance = float(vuelo.get("distance", 0)) 
+                air_t = int(vuelo.get("air_time", 0)) if vuelo.get("air_time", "") != "" else 0
+                distance = float(vuelo.get("distance", 0)) if vuelo.get("distance", "") != "" else 0.0
                 carrier = vuelo["carrier"]
                 info = mp.get(mapa_carrier, carrier)
                 if info is None:
@@ -502,8 +501,9 @@ def req_5(catalog,rango_fecha, dest, n):
                             "distance": distance
                         }
                     }
-                    
+                    mp.put(mapa_carrier, carrier, info)
                 else:
+                    
                     info["count"] += 1
                     info["total_delay"] += dif
                     info["total_air_time"] += air_t
@@ -519,9 +519,10 @@ def req_5(catalog,rango_fecha, dest, n):
                             "air_time": air_t,
                             "distance": distance
                         }
-                mp.put(mapa_carrier, carrier, info)
+                    mp.put(mapa_carrier, carrier, info)
             j += 1
-        i += 1    
+        i += 1
+    
     resultado = rbt.new_map()
     claves = mp.key_set(mapa_carrier)
     total_aerolineas = lt.size(claves)
@@ -529,7 +530,7 @@ def req_5(catalog,rango_fecha, dest, n):
     k = 0
     while k < total_aerolineas:
         carrier = lt.get_element(claves, k)
-        info = me.get_value(mp.get(mapa_carrier, carrier))
+        info = mp.get(mapa_carrier, carrier)
         if info["count"] > 0:
             promedio_delay = info["total_delay"] / info["count"]
             promedio_air_time = info["total_air_time"] / info["count"]
