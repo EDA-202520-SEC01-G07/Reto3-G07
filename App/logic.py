@@ -294,7 +294,17 @@ def req_2(catalog,dest,rango_minutos):
     tiempo= delta_time(start,end)
     return tiempo, filtrados, vuelos_filtrados
 
-
+def compare_viajes(v1, v2):
+    if v1["distance"] < v2["distance"]:
+        return True
+    elif v1["distance"] > v2["distance"]:
+        return False
+    else:
+        # Combinar fecha y hora en un solo string
+        fecha1 = v1["date"] + " " + v1["arr_time"]
+        fecha2 = v2["date"] + " " + v2["arr_time"]
+        return fecha1 < fecha2
+    
 def req_3(catalog, carrier, dest, rango_dist):
     """
     Retorna el resultado del requerimiento 3
@@ -312,9 +322,47 @@ def req_3(catalog, carrier, dest, rango_dist):
                 if rango_dist[0]<= viaje["distance"] <= rango_dist[1]:
                     lt.add_last(filtro, viaje)
                     filtrado+=1
+    filtro= merge_sort(filtro, compare_viajes)
     end= get_time()
     tiempo= delta_time(start,end)
     return tiempo, filtrado, filtro
+
+def merge_sort(my_list, sort_crit):
+    my_list["size"] = len(my_list["elements"])
+    if my_list["size"] <= 1:
+        return my_list
+    mitad = my_list["size"] // 2
+    #  sub_list(pos, num) → num = cantidad de elementos, no fin
+    izq = lt.sub_list(my_list, 0, mitad)
+    dere = lt.sub_list(my_list, mitad, my_list["size"] - mitad)
+    mitad_izqui = merge_sort(izq, sort_crit)
+    mitad_dere = merge_sort(dere, sort_crit)
+    return merge(mitad_izqui, mitad_dere, sort_crit)
+
+
+def merge(list_1, list_2, sort_crit):
+    l = 0
+    r = 0
+    merged_list = lt.new_list()
+    while l < list_1["size"] and r < list_2["size"]:
+        ei = lt.get_element(list_1, l)
+        ed = lt.get_element(list_2, r)
+        if sort_crit(ei, ed):
+            lt.add_last(merged_list, ei)
+            l += 1
+        else:
+            lt.add_last(merged_list, ed)
+            r += 1
+    #  Añadir los elementos sobrantes de list_1
+    while l < list_1["size"]:
+        lt.add_last(merged_list, lt.get_element(list_1, l))
+        l += 1
+    #  Añadir los elementos sobrantes de list_2
+    while r < list_2["size"]:
+        lt.add_last(merged_list, lt.get_element(list_2, r))
+        r += 1
+    merged_list["size"] = len(merged_list["elements"])
+    return merged_list
 
 
 def req_4(catalog,rango_fecha_ini, rango_fecha_fin, franja_hora_salida_uno, franja_hora_salida_dos, cant_aereolineas_mas_vuelos):
