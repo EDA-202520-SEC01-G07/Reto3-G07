@@ -473,11 +473,11 @@ def req_6(catalog, rango_f, rango_d, m):
     for i in range(sl.size(fechas)):
         lista_de_viajes = sl.get_element(fechas, i)
         for j in range(sl.size(lista_de_viajes)):
-            viaje = sl.get_element( lista_de_viajes, j)
+            viaje = sl.get_element(lista_de_viajes, j)
             if rango_d[0] <= viaje["distance"] and viaje["distance"] <= rango_d[1]:
                 v = {"Id": viaje["id"],
                     "Código": viaje["flight"],
-                    "F-H Salida": viaje["date"]+"_"+viaje["dep_time"],
+                    "F-H Salida": viaje["date"]+" "+viaje["dep_time"],
                     "Origen": viaje["origin"],
                     "Destino": viaje["dest"]
                     }
@@ -502,8 +502,9 @@ def req_6(catalog, rango_f, rango_d, m):
     promedio = 0
     desviacion = 0
     aero = pq.new_heap(True)
+    clave=mp.key_set(aerolineas)
     for i in range(mp.size(aerolineas)):
-        mapa = mp.get(aerolineas, lt.get_element(mp.key_set(aerolineas), i))
+        mapa = mp.get(aerolineas, lt.get_element(clave, i))
         lista = mp.get(mapa, "dif_ind")
         trayectos = mp.get(mapa, "trayectos")
         t = 0
@@ -511,20 +512,27 @@ def req_6(catalog, rango_f, rango_d, m):
         for j in range(lt.size(lista)):
             t += 1
             suma += lt.get_element(lista, j)
-        promedio = suma/t
+        if t>0:
+            promedio = suma/t
+        else:
+            promedio = 0
         t = 0
         suma = 0
         menor = 9999999999
         vuelo = None
         for j in range(lt.size(lista)):
-            if lt.get_element(lista, j) < menor:
-                menor = lt.get_element(lista, j)
+            d=abs(promedio-lt.get_element(lista, j))
+            if d < menor:
+                menor = d
                 vuelo = lt.get_element(trayectos, j)
             t += 1
             suma += (lt.get_element(lista, j) - promedio)**2
-        desviacion = math.sqrt(suma/t)        
+        if t>0:
+            desviacion = math.sqrt(suma/t)
+        else:
+            desviacion=0
         
-        info = {"Aerolinea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
+        info = {"Aerolínea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
                 "# vuelos": lt.size(trayectos),
                 "Promedio (min)": round(promedio,2),
                 "Estabilidad": round(desviacion, 2),
