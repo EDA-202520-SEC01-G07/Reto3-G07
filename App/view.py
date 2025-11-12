@@ -241,26 +241,32 @@ def print_req_5(control):
     print("Tiempo de ejecución (ms):", round(tiempo, 2))
     print("Aerolíneas consideradas (M):", total_aero)
 
-    valores = rbt.value_set(arbol)
-
+    valores = rbt.value_set(arbol)  
     filas = []
     i = 0
-    tam_val = sl.size(valores)  
+    tam_val = sl.size(valores)
+
     while i < tam_val and len(filas) < n:
-        bucket = sl.get_element(valores, i) 
+        bucket = sl.get_element(valores, i)  
         j = 0
         tam_b = lt.size(bucket)
         while j < tam_b and len(filas) < n:
-            item = lt.get_element(bucket, j)  
+            item = lt.get_element(bucket, j) 
+            maxf = item["Vuelo mayor distancia"]
             filas.append({
                 "Carrier": item["Aerolínea"],
-                "Vuelos": item["Vuelos totales"],
+                "Vuelos totales": item["Vuelos totales"],
                 "Retraso prom. (min)": item["Retraso promedio llegada (min)"],
                 "Duración prom. (min)": item["Duración promedio vuelo (min)"],
                 "Dist. prom. (mi)": item["Distancia promedio vuelo (millas)"],
-                "MaxDist ID": item["Vuelo mayor distancia"]["id"],
-                "MaxDist Flight": item["Vuelo mayor distancia"]["flight"],
-                "MaxDist Dist (mi)": item["Vuelo mayor distancia"]["distance"],
+                "Max ID": maxf["id"],
+                "Max Flight": maxf["flight"],
+                "Max Fecha": maxf["date"],
+                "Max Dep": maxf["dep_time"],
+                "Max Origen": maxf["origin"],
+                "Max Destino": maxf["dest"],
+                "Max AirTime (min)": maxf["air_time"],
+                "Max Dist (mi)": maxf["distance"],
             })
             j += 1
         i += 1
@@ -271,6 +277,7 @@ def print_req_5(control):
 
     print(f"\n-- Top {len(filas)} aerolíneas --")
     print(tb.tabulate(filas, headers="keys", tablefmt="fancy_grid"))
+
 
 
 
