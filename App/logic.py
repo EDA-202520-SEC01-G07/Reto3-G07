@@ -480,11 +480,11 @@ def req_5(catalog,rango_fecha, dest, n):
                 dif = diferencia_tiempo(vuelo["arr_time"], vuelo["sched_arr_time"])
                 if dif < 0:
                     dif = -dif
-                air_t = int(vuelo.get("air_time", 0)) if vuelo.get("air_time", "") != "" else 0
-                distance = float(vuelo.get("distance", 0)) if vuelo.get("distance", "") != "" else 0.0
+                air_t = int(vuelo.get("air_time", 0)) 
+                distance = float(vuelo.get("distance", 0)) 
                 carrier = vuelo["carrier"]
-                entry = mp.get(mapa_carrier, carrier)
-                if entry is None:
+                info = mp.get(mapa_carrier, carrier)
+                if info is None:
                     info = {
                         "carrier": carrier,
                         "count": 1,
@@ -502,9 +502,8 @@ def req_5(catalog,rango_fecha, dest, n):
                             "distance": distance
                         }
                     }
-                    mp.put(mapa_carrier, carrier, info)
+                    
                 else:
-                    info = entry
                     info["count"] += 1
                     info["total_delay"] += dif
                     info["total_air_time"] += air_t
@@ -520,17 +519,16 @@ def req_5(catalog,rango_fecha, dest, n):
                             "air_time": air_t,
                             "distance": distance
                         }
-                    mp.put(mapa_carrier, carrier, info)
+                mp.put(mapa_carrier, carrier, info)
             j += 1
-       
-    
+        i += 1    
     resultado = rbt.new_map()
     claves = mp.key_set(mapa_carrier)
     total_aerolineas = lt.size(claves)
     
-    i = 0
-    while i < total_aerolineas:
-        carrier = lt.get_element(claves, i)
+    k = 0
+    while k < total_aerolineas:
+        carrier = lt.get_element(claves, k)
         info = me.get_value(mp.get(mapa_carrier, carrier))
         if info["count"] > 0:
             promedio_delay = info["total_delay"] / info["count"]
@@ -553,7 +551,7 @@ def req_5(catalog,rango_fecha, dest, n):
             else:
                 lt.add_last(lst, datos)
                 rbt.put(resultado, clave, lst)
-        i += 1
+        k += 1
     
     end = get_time()
     tiempo = delta_time(start, end)
