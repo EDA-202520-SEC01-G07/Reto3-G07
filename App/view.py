@@ -241,17 +241,15 @@ def print_req_5(control):
     print("Tiempo de ejecución (ms):", round(tiempo, 2))
     print("Aerolíneas consideradas (M):", total_aero)
 
-    valores = rbt.value_set(arbol)  
+    valores = rbt.value_set(arbol)   
     filas = []
-    i = 0
-    tam_val = sl.size(valores)
 
-    while i < tam_val and len(filas) < n:
+    i = 0
+    while i < sl.size(valores) and len(filas) < n:
         bucket = sl.get_element(valores, i)  
         j = 0
-        tam_b = lt.size(bucket)
-        while j < tam_b and len(filas) < n:
-            item = lt.get_element(bucket, j) 
+        while j < lt.size(bucket) and len(filas) < n:
+            item = lt.get_element(bucket, j)
             maxf = item["Vuelo mayor distancia"]
             filas.append({
                 "Carrier": item["Aerolínea"],
@@ -260,7 +258,7 @@ def print_req_5(control):
                 "Duración prom. (min)": item["Duración promedio vuelo (min)"],
                 "Dist. prom. (mi)": item["Distancia promedio vuelo (millas)"],
                 "Max ID": maxf["id"],
-                "Max Flight": maxf["flight"],
+                "Max Vuelo": maxf["flight"],
                 "Max Fecha": maxf["date"],
                 "Max Dep": maxf["dep_time"],
                 "Max Origen": maxf["origin"],
@@ -277,6 +275,7 @@ def print_req_5(control):
 
     print(f"\n-- Top {len(filas)} aerolíneas --")
     print(tb.tabulate(filas, headers="keys", tablefmt="fancy_grid"))
+
 
 
 
