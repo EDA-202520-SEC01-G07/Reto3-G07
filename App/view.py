@@ -93,21 +93,19 @@ def print_req_2(control):
     print("Tiempo de ejecución (ms): " + str(round(tiempo, 2)))
     print("Número de vuelos filtrados: " + str(filtrados))
 
-    # 1) Obtener el conjunto de valores (cada valor es una LISTA de dicts)
+  
     valores = rbt.value_set(vuelos_filtrados)
 
-    # 2) Aplanar a una lista simple de dicts para tabular
     vuelos_flat = []
     i = 0
     while i < sl.size(valores):
-        bucket = sl.get_element(valores, i)   # bucket es una lista DISClib de diccionarios
+        bucket = sl.get_element(valores, i)   
         j = 0
         while j < sl.size(bucket):
-            vuelos_flat.append(sl.get_element(bucket, j))  # dict
+            vuelos_flat.append(sl.get_element(bucket, j)) 
             j += 1
         i += 1
 
-    # 3) Imprimir primeros 5 y últimos 5, o todos si <= 10
     total = len(vuelos_flat)
     if total == 0:
         print("\nNo se encontraron vuelos en el rango indicado.")
@@ -232,31 +230,28 @@ def print_req_5(control):
     dest  = input("Código de aeropuerto destino (ej. JFK): ").upper().strip()
     n     = int(input("Cantidad de aerolíneas a mostrar (N): ").strip())
 
-    # Parseo simple del rango a dos strings
     partes = [p.strip() for p in rango.split(",")]
     if len(partes) != 2:
-        print("❌ Formato inválido. Usa: YYYY-MM-DD,YYYY-MM-DD")
+        print("Formato inválido. Usa: YYYY-MM-DD,YYYY-MM-DD")
         return
 
-    # Lógica
     tiempo, total_aero, arbol = lg.req_5(control, partes, dest, n)
 
     print("\n=== Requerimiento 5: Aerolíneas más puntuales (llegada) ===")
     print("Tiempo de ejecución (ms):", round(tiempo, 2))
     print("Aerolíneas consideradas (M):", total_aero)
 
-    # values() del RBT -> lista (single_linked_list) de buckets
     valores = rbt.value_set(arbol)
 
     filas = []
     i = 0
-    tam_val = sl.size(valores)  # lista externa con SL
+    tam_val = sl.size(valores)  
     while i < tam_val and len(filas) < n:
-        bucket = sl.get_element(valores, i)  # cada bucket es un array_list (lt)
+        bucket = sl.get_element(valores, i) 
         j = 0
         tam_b = lt.size(bucket)
         while j < tam_b and len(filas) < n:
-            item = lt.get_element(bucket, j)  # dict agregado de una aerolínea
+            item = lt.get_element(bucket, j)  
             filas.append({
                 "Carrier": item["Aerolínea"],
                 "Vuelos": item["Vuelos totales"],
