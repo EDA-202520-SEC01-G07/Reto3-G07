@@ -84,25 +84,24 @@ def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
     """
-    dest = input("Diga el código del aeropuerto de destino: ").upper()
-    rango_minutos = input("Diga el rango de minutos (min,max): ")
+    dest = input("Diga el código del aeropuerto de destino: ").upper().strip()
+    rango_minutos = input("Diga el rango de minutos de anticipo (min,max): ").strip()
 
     tiempo, filtrados, vuelos_filtrados = lg.req_2(control, dest, rango_minutos)
 
-    print("\n=== Requerimiento 2: Vuelos con anticipo en destino ===")
-    print("Tiempo de ejecución (ms): " + str(round(tiempo, 2)))
-    print("Número de vuelos filtrados: " + str(filtrados))
+    print("\n=== Requerimiento 2: Vuelos con anticipo en la llegada ===")
+    print("Tiempo de ejecución (ms):", round(tiempo, 2))
+    print("Número de vuelos filtrados:", filtrados)
 
-  
     valores = rbt.value_set(vuelos_filtrados)
 
     vuelos_flat = []
     i = 0
     while i < sl.size(valores):
-        bucket = sl.get_element(valores, i)   
+        mapaf = sl.get_element(valores, i)
         j = 0
-        while j < sl.size(bucket):
-            vuelos_flat.append(sl.get_element(bucket, j)) 
+        while j < sl.size(mapaf):
+            vuelos_flat.append(sl.get_element(mapaf, j))
             j += 1
         i += 1
 
@@ -123,6 +122,7 @@ def print_req_2(control):
     else:
         print("\n-- Vuelos filtrados --")
         print(tb.tabulate(vuelos_flat, headers="keys", tablefmt="fancy_grid"))
+
 
 
 def print_req_3(control):
