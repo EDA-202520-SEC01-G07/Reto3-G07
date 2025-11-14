@@ -269,9 +269,9 @@ def req_2(catalog,dest,rango_minutos):
         if viaje["arr_time"] == "Unknown" or viaje["sched_arr_time"] == "Unknown":
             i += 1
             continue
-        anticipo = diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
-        if anticipo < 0:
-            anticipo = -anticipo    # minutos de anticipo (positivo)
+        anticipo_min = diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
+        if anticipo_min < 0:
+            anticipo = -anticipo_min    # minutos de anticipo (positivo)
         else:
             i += 1
             continue
