@@ -297,9 +297,9 @@ def print_req_6(control):
     r_distancias = [d1, d2]
     m = int(input("Diga el número de aerolíneas a mostrar: "))
     
-    tiempo, aerolineas = lg.req_6(control, r_fechas, r_distancias, m)
+    tiempo, aerolineas, tam = lg.req_6(control, r_fechas, r_distancias, m)
     print("Tiempo de ejecución: "+str(round(tiempo, 3)))
-    print("Aerolíneas analizadas: "+str(m))
+    print("Aerolíneas analizadas: "+str(tam))  #Son las aerolíneas totales que pasan los filtros?
     
     lista = []
     while not pq.is_empty(aerolineas):
@@ -328,6 +328,7 @@ def main():
         print_menu()
         inputs = input('Seleccione una opción para continuar\n')
         if int(inputs) == 0:
+            control = new_logic()
             print("Cargando información de los archivos ....\n")
             data = load_data(control)
         elif int(inputs) == 1:
