@@ -263,14 +263,18 @@ def req_2(catalog,dest,rango_minutos):
         tiempo= delta_time(start,end)
         return tiempo,0, vuelos_filtrados
 
-    for i in range (sl.size(vuelos_dest)):
-        viaje= sl.get_element(vuelos_dest, i)
-        anticipo=diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
-        if anticipo < 0:
-            anticipo = -anticipo    # minutos de anticipo (positivo)
-        else:
+    i=0
+    while i < sl.size(vuelos_dest):
+        viaje = sl.get_element(vuelos_dest, i)
+        if viaje["arr_time"] == "Unknown" or viaje["sched_arr_time"] == "Unknown":
+            i += 1
             continue
-        
+        anticipo_min = diferencia_tiempo(viaje["arr_time"], viaje["sched_arr_time"])
+        if anticipo_min < 0:
+            anticipo = -anticipo_min    # minutos de anticipo (positivo)
+        else:
+            i += 1
+            continue
         if rango_min <= anticipo <= rango_max:
             filtrados+=1
             info={"Id": viaje["id"],
@@ -281,6 +285,7 @@ def req_2(catalog,dest,rango_minutos):
             "Origen": viaje["origin"],
             "Destino": viaje["dest"],
             "Anticipo llegada": anticipo}
+            
             mapaf=rbt.get(vuelos_filtrados, anticipo)
             if mapaf is None:
                 lista= sl.new_list()
@@ -289,6 +294,7 @@ def req_2(catalog,dest,rango_minutos):
             else:
                 sl.add_last (mapaf, info)
                 rbt.put (vuelos_filtrados, anticipo, mapaf)
+        i+=1
             
     end= get_time()
     tiempo= delta_time(start,end)
