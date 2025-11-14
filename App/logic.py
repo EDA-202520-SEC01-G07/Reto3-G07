@@ -576,7 +576,7 @@ def req_6(catalog, rango_f, rango_d, m):
             viaje = sl.get_element(lista_de_viajes, j)
             if rango_d[0] <= viaje["distance"] and viaje["distance"] <= rango_d[1]:
                 v = {"Id": viaje["id"],
-                    "Código": viaje["flight"],
+                    "Código": viaje["tailnum"],  #O ES EL NÚMERO DEL VUELO "flight"
                     "F-H Salida": viaje["date"]+" "+viaje["dep_time"],
                     "Origen": viaje["origin"],
                     "Destino": viaje["dest"]
@@ -593,9 +593,9 @@ def req_6(catalog, rango_f, rango_d, m):
                     mp.put(datos, "trayectos", trayectos)
                     
                     mp.put(aerolineas, viaje["carrier"], datos)
-                aer = mp.get(aerolineas, viaje["carrier"])
-                lt.add_last(mp.get(aer,"dif_ind"), diferencia)
-                lt.add_last(mp.get(aer, "trayectos"), v)
+                else:
+                    lt.add_last(mp.get(aer,"dif_ind"), diferencia)
+                    lt.add_last(mp.get(aer, "trayectos"), v)
     #Termino de llenar todos los viajes que pasan el filtro y sus datos
     
     #Calcular desviación estandar y promedio
@@ -612,10 +612,7 @@ def req_6(catalog, rango_f, rango_d, m):
         for j in range(lt.size(lista)):
             t += 1
             suma += lt.get_element(lista, j)
-        if t>0:
-            promedio = suma/t
-        else:
-            promedio = 0
+        promedio = suma/t
         t = 0
         suma = 0
         menor = 9999999999
@@ -627,10 +624,7 @@ def req_6(catalog, rango_f, rango_d, m):
                 vuelo = lt.get_element(trayectos, j)
             t += 1
             suma += (lt.get_element(lista, j) - promedio)**2
-        if t>0:
-            desviacion = math.sqrt(suma/t)
-        else:
-            desviacion=0
+        desviacion = math.sqrt(suma/t)
         
         info = {"Aerolínea": lt.get_element(mp.key_set(aerolineas),i), #Código aerolínea,
                 "# vuelos": lt.size(trayectos),
@@ -642,7 +636,7 @@ def req_6(catalog, rango_f, rango_d, m):
     
     end = get_time()
     tiempo = delta_time(start, end)
-    return tiempo, aero
+    return tiempo, aero, mp.size(aerolineas)
 
 
 # Funciones para medir tiempos de ejecucion
