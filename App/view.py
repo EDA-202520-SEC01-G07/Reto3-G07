@@ -83,26 +83,27 @@ def print_req_1(control):
 def print_req_2(control):
     """
         Función que imprime la solución del Requerimiento 2 en consola
+        (CORREGIDA para manejar el RBT con clave compuesta y datos directos)
     """
     dest = input("Diga el código del aeropuerto de destino: ").upper().strip()
     rango_minutos = input("Diga el rango de minutos de anticipo (min,max): ").strip()
 
+   
     tiempo, filtrados, vuelos_filtrados = lg.req_2(control, dest, rango_minutos)
 
     print("\n=== Requerimiento 2: Vuelos con anticipo en la llegada ===")
     print("Tiempo de ejecución (ms):", round(tiempo, 2))
     print("Número de vuelos filtrados:", filtrados)
 
-    valores = rbt.value_set(vuelos_filtrados)
+ 
+    valores = rbt.value_set(vuelos_filtrados) 
 
+  
     vuelos_flat = []
     i = 0
     while i < sl.size(valores):
-        mapaf = sl.get_element(valores, i)
-        j = 0
-        while j < sl.size(mapaf):
-            vuelos_flat.append(sl.get_element(mapaf, j))
-            j += 1
+       
+        vuelos_flat.append(sl.get_element(valores, i)) 
         i += 1
 
     total = len(vuelos_flat)
@@ -110,17 +111,18 @@ def print_req_2(control):
         print("\nNo se encontraron vuelos en el rango indicado.")
         return
 
+    #  Aplicar el filtro de 5 primeros y 5 últimos
     if total > 10:
         primeros = vuelos_flat[:5]
         ultimos = vuelos_flat[-5:]
 
-        print("\n-- Primeros vuelos filtrados --")
+        print("\n-- Primeros 5 vuelos filtrados (Menor anticipo, Cronológico) --")
         print(tb.tabulate(primeros, headers="keys", tablefmt="fancy_grid"))
 
-        print("\n-- Últimos vuelos filtrados --")
+        print("\n-- Últimos 5 vuelos filtrados (Mayor anticipo, Cronológico) --")
         print(tb.tabulate(ultimos, headers="keys", tablefmt="fancy_grid"))
     else:
-        print("\n-- Vuelos filtrados --")
+        print(f"\n-- Vuelos filtrados (Total: {total}) --")
         print(tb.tabulate(vuelos_flat, headers="keys", tablefmt="fancy_grid"))
 
 

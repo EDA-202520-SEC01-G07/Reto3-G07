@@ -276,6 +276,12 @@ def req_2(catalog,dest,rango_minutos):
             i += 1
             continue
         if rango_min <= anticipo <= rango_max:
+            
+            clave=convertir_a_timestamp(viaje["date"], viaje["arr_time"])
+            clave_rbt=(anticipo, clave)
+            if clave is None:
+                i+=1
+                continue
             filtrados+=1
             info={"Id": viaje["id"],
             "Codigo Vuelo": viaje["flight"],
@@ -285,20 +291,24 @@ def req_2(catalog,dest,rango_minutos):
             "Origen": viaje["origin"],
             "Destino": viaje["dest"],
             "Anticipo llegada": anticipo}
-            
-            mapaf=rbt.get(vuelos_filtrados, anticipo)
-            if mapaf is None:
-                lista= sl.new_list()
-                sl.add_last(lista, info)
-                rbt.put (vuelos_filtrados, anticipo, lista)
-            else:
-                sl.add_last (mapaf, info)
-                rbt.put (vuelos_filtrados, anticipo, mapaf)
+            rbt.put(vuelos_filtrados, clave_rbt, info)
         i+=1
             
     end= get_time()
     tiempo= delta_time(start,end)
     return tiempo, filtrados, vuelos_filtrados
+def convertir_a_timestamp(date_str, time_str):
+    """
+    Combina la fecha (str) y la hora (str) en un objeto datetime.datetime
+    para ser usado como una clave ordenable cronológicamente.
+    """
+    try:
+        # El formato de entrada es, por ejemplo: "2013-01-01 10:25"
+        return dt.datetime.strptime(date_str + " " + time_str, "%Y-%m-%d %H:%M")
+    except ValueError:
+        # Manejo de error si el formato es incorrecto, aunque el load_data sugiere que es el correcto.
+        # Si el tiempo de llegada es "Unknown", el req_2 ya lo filtra, pero es buena práctica.
+        return None
 
 def compare_viajes(v1, v2):
     if v1["distance"] < v2["distance"]:
